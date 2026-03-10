@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicConfig } from "@/hooks/use-public-config";
 import type { Service, ServiceCategory } from "@/config/types";
 import Link from "next/link";
+import { useTranslations } from "@/lib/i18n/client";
 
 // 服务状态类型
 type ServiceStatus = "unknown" | "online" | "offline" | "checking";
@@ -24,6 +25,7 @@ export default function PortalPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [serviceHealth, setServiceHealth] = useState<Record<string, ServiceHealth>>({});
   const { data: runtimeConfig, loading: configLoading } = usePublicConfig();
+  const { t } = useTranslations();
 
   const runtimeServices = useMemo<Service[]>(
     () => runtimeConfig?.services ?? [],
@@ -156,7 +158,7 @@ export default function PortalPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">加载服务配置中...</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -169,13 +171,13 @@ export default function PortalPage() {
         <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
           <Sparkles className="h-6 w-6 text-white" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">服务门户</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("portal.title")}</h1>
         <p className="mt-2 text-muted-foreground">
-          一站式访问您所有的工作和生活服务
+          {t("portal.subtitle")}
         </p>
         <div className="mt-4">
           <Link href="/dashboard">
-            <Button variant="outline" size="sm">进入账户中心</Button>
+            <Button variant="outline" size="sm">{t("portal.enterAccountCenter")}</Button>
           </Link>
         </div>
 
@@ -184,7 +186,7 @@ export default function PortalPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="搜索服务..."
+              placeholder={t("portal.searchPlaceholder")}
               className="pl-9 pr-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -200,7 +202,7 @@ export default function PortalPage() {
           </div>
           {hasSearch && (
             <p className="mt-2 text-sm text-muted-foreground">
-              找到 {filteredServices.length} 个服务
+              {t("portal.searchResultCount", { count: String(filteredServices.length) })}
             </p>
           )}
         </div>
@@ -210,9 +212,9 @@ export default function PortalPage() {
       {hasSearch ? (
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">搜索结果</h2>
+            <h2 className="text-lg font-semibold">{t("portal.searchResults")}</h2>
             <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")}>
-              清除搜索
+              {t("portal.clearSearch")}
             </Button>
           </div>
           {filteredServices.length > 0 ? (
@@ -227,7 +229,7 @@ export default function PortalPage() {
             </div>
           ) : (
             <Card className="p-8 text-center">
-              <p className="text-muted-foreground">没有找到匹配的服务</p>
+              <p className="text-muted-foreground">{t("portal.noSearchResults")}</p>
             </Card>
           )}
         </div>
@@ -238,9 +240,9 @@ export default function PortalPage() {
             <div>
               <div className="mb-4 flex items-center gap-2">
                 <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                  热门
+                  {t("portal.popular")}
                 </Badge>
-                <h2 className="text-lg font-semibold">常用服务</h2>
+                <h2 className="text-lg font-semibold">{t("portal.popularServices")}</h2>
               </div>
               <div className="grid items-stretch gap-4 lg:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {runtimeServices
@@ -283,9 +285,9 @@ export default function PortalPage() {
           {/* All Services */}
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">全部服务</h2>
+              <h2 className="text-lg font-semibold">{t("portal.allServices")}</h2>
               <Button variant="ghost" size="sm" onClick={checkAllServices}>
-                刷新状态
+                {t("portal.refreshStatus")}
               </Button>
             </div>
             <div className="grid items-stretch gap-4 lg:gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -304,14 +306,14 @@ export default function PortalPage() {
       {/* Footer Info */}
       <Card className="bg-muted/50">
         <CardHeader>
-          <CardTitle className="text-base">关于服务门户</CardTitle>
+          <CardTitle className="text-base">{t("portal.footerTitle")}</CardTitle>
           <CardDescription>
-            服务门户汇集了所有接入 Logto 身份认证的服务
+            {t("portal.footerDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            所有服务均使用统一的身份认证，无需重复登录。如果您需要访问新的服务，请联系管理员添加。
+            {t("portal.footerContent")}
           </p>
         </CardContent>
       </Card>

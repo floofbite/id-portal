@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Service } from "@/config/types";
+import { useTranslations } from "@/lib/i18n/client";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -44,6 +45,8 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, health }: ServiceCardProps) {
+  const { t } = useTranslations();
+
   // Get the icon component
   const IconComponent = iconMap[service.iconName] || Globe;
 
@@ -58,27 +61,27 @@ export function ServiceCard({ service, health }: ServiceCardProps) {
             <CheckCircle className="h-3 w-3" />
             {health.latency && health.latency < 1000
               ? `${health.latency}ms`
-              : "正常"}
+              : t("service.status.normal")}
           </Badge>
         );
       case "offline":
         return (
           <Badge variant="destructive" className="gap-1">
             <XCircle className="h-3 w-3" />
-            离线
+            {t("service.status.offline")}
           </Badge>
         );
       case "checking":
         return (
           <Badge variant="secondary" className="gap-1">
             <Loader2 className="h-3 w-3 animate-spin" />
-            检测中
+            {t("service.status.checking")}
           </Badge>
         );
       default:
         return (
           <Badge variant="outline" className="text-muted-foreground">
-            未检测
+            {t("service.status.unknown")}
           </Badge>
         );
     }
@@ -105,7 +108,7 @@ export function ServiceCard({ service, health }: ServiceCardProps) {
               )}
               {service.isPopular && (
                 <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-xs text-white">
-                  热门
+                  {t("portal.popular")}
                 </Badge>
               )}
               {renderStatus()}

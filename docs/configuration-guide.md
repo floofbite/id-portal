@@ -212,3 +212,28 @@ docker compose restart app
 
 - `services[].category` 是否存在于 `serviceCategories[].id`
 - `href` / `ping` 是否是合法 URL
+
+---
+
+## 七、i18n（当前支持中文 / English）
+
+### 1) 当前能力
+
+- 已支持 `zh` 与 `en` 两种界面语言。
+- 语言偏好来源：
+  1. 设置页切换（本地保存）
+  2. 同步到账户 `locale` 字段（通过 `/api/account/profile/details`）
+- 当前设置页仅提供两种选项：`简体中文`、`English`。
+
+### 2) 语言切换如何生效
+
+- 在「偏好设置 -> 语言」切换后，会立即更新本地语言状态。
+- 刷新页面后，导航、服务门户、状态文案等会按所选语言展示。
+
+### 3) 开发者新增文案规则
+
+- 不要在页面直接硬编码中英文文案。
+- 优先在以下语言包中添加 key：
+  - `lib/i18n/zh.ts`
+  - `lib/i18n/en.ts`
+- 在 client 组件中通过 `useTranslations()` 读取文案。

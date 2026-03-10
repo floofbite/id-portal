@@ -18,6 +18,7 @@ import {
   mainNavItems,
   auxiliaryNavItems,
   isNavItemActive,
+  getNavLabel,
 } from "@/config/navigation";
 import {
   Menu,
@@ -28,6 +29,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "@/lib/i18n/client";
 
 interface NavbarProps {
   user?: {
@@ -42,6 +44,7 @@ interface NavbarProps {
 export function Navbar({ user, onSignOut }: NavbarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { t, language } = useTranslations();
 
   const allNavItems = [...mainNavItems, ...auxiliaryNavItems];
 
@@ -57,10 +60,10 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
-              <SheetTitle className="sr-only">导航菜单</SheetTitle>
+              <SheetTitle className="sr-only">{t("nav.menu")}</SheetTitle>
               <div className="flex h-16 items-center border-b px-6">
                 <LayoutGrid className="h-5 w-5 mr-2" />
-                <span className="font-semibold">Account Center</span>
+                <span className="font-semibold">{t("meta.appTitle")}</span>
               </div>
               <nav className="space-y-1 p-3">
                 {allNavItems.map((item) => {
@@ -72,7 +75,7 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
                         className={cn("w-full justify-start gap-3", isActive && "font-medium")}
                       >
                         <item.icon className="h-4 w-4" />
-                        {item.title}
+                        {getNavLabel(item, language)}
                       </Button>
                     </Link>
                   );
@@ -84,7 +87,7 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
           {/* Logo - Desktop */}
           <Link href="/dashboard" className="hidden items-center gap-2 font-semibold md:flex">
             <LayoutGrid className="h-5 w-5" />
-            <span>Account Center</span>
+            <span>{t("meta.appTitle")}</span>
           </Link>
 
           {/* Logo - Mobile */}
@@ -103,7 +106,7 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">切换主题</span>
+            <span className="sr-only">{t("common.toggleTheme")}</span>
           </Button>
 
           {/* User Menu */}
@@ -112,14 +115,14 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
               <Button variant="ghost" className="gap-2 pl-2">
                 <Avatar className="h-8 w-8">
                   {user?.avatar && (
-                    <AvatarImage src={user.avatar} alt={user?.name || user?.username || "用户"} />
+                    <AvatarImage src={user.avatar} alt={user?.name || user?.username || t("common.user")} />
                   )}
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-bold text-white">
-                    {user?.name?.charAt(0) || user?.username?.charAt(0) || "U"}
+                    {user?.name?.charAt(0) || user?.username?.charAt(0) || t("common.userInitial")}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden max-w-[100px] truncate sm:inline">
-                  {user?.name || user?.username || "用户"}
+                  {user?.name || user?.username || t("common.user")}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
@@ -127,9 +130,9 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col">
-                  <span>{user?.name || user?.username || "用户"}</span>
+                  <span>{user?.name || user?.username || t("common.user")}</span>
                   <span className="text-xs font-normal text-muted-foreground">
-                    {user?.email || "未设置邮箱"}
+                    {user?.email || t("common.emailNotSet")}
                   </span>
                 </div>
               </DropdownMenuLabel>
@@ -138,7 +141,7 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
                 <Link key={item.href} href={item.href}>
                   <DropdownMenuItem>
                     <item.icon className="mr-2 h-4 w-4" />
-                    {item.title}
+                    {getNavLabel(item, language)}
                   </DropdownMenuItem>
                 </Link>
               ))}
@@ -148,14 +151,14 @@ export function Navbar({ user, onSignOut }: NavbarProps) {
                     const Icon = auxiliaryNavItems[0].icon;
                     return <Icon className="mr-2 h-4 w-4" />;
                   })()}
-                  {auxiliaryNavItems[0].title}
+                  {getNavLabel(auxiliaryNavItems[0], language)}
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuSeparator />
               {onSignOut && (
                 <DropdownMenuItem onClick={onSignOut} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  退出登录
+                  {t("nav.signOut")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

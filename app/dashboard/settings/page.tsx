@@ -38,17 +38,17 @@ import type { FeaturesConfig } from "@/config/types";
 import { isFeatureEnabled as isFeatureEnabledFromConfig } from "@/lib/config/feature-helpers";
 import { usePublicConfig } from "@/hooks/use-public-config";
 import { signOutAction } from "@/app/actions/auth";
-
-// 语言存储 key
-const LANGUAGE_STORAGE_KEY = "account-center-language";
+import { normalizeLocale } from "@/lib/i18n";
+import { useTranslations } from "@/lib/i18n/client";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const { toast } = useToast();
+  const { t, language: i18nLanguage, setLanguage: setI18nLanguage } = useTranslations();
   const { data: runtimeConfig, loading: configLoading } = usePublicConfig();
   const [mounted, setMounted] = useState(false);
-  const [language, setLanguage] = useState("zh-CN");
+  const [language, setLanguage] = useState(i18nLanguage === "en" ? "en" : "zh-CN");
   const [isUpdatingLanguage, setIsUpdatingLanguage] = useState(false);
 
   // 账户删除状态
@@ -71,19 +71,17 @@ export default function SettingsPage() {
     [runtimeFeatures]
   );
 
-  // 避免水合不匹配，并从 localStorage 加载语言设置
+  // 避免水合不匹配，并同步 i18n 语言状态
   useEffect(() => {
     setMounted(true);
-    const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (savedLang) {
-      setLanguage(savedLang);
-    }
-  }, []);
+    setLanguage(i18nLanguage === "en" ? "en" : "zh-CN");
+  }, [i18nLanguage]);
 
   // 处理语言切换 - 同时保存到 localStorage 和 OIDC profile
   const handleLanguageChange = useCallback(async (value: string) => {
+    const nextLanguage = normalizeLocale(value);
+    setI18nLanguage(nextLanguage);
     setLanguage(value);
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, value);
     setIsUpdatingLanguage(true);
 
     try {
@@ -99,27 +97,27 @@ export default function SettingsPage() {
       }
 
       toast({
-        title: "语言已更新",
-        description: "语言偏好已保存到您的账户",
+        title: t("settings.languageUpdatedTitle"),
+        description: t("settings.languageUpdatedDesc"),
       });
     } catch {
       // 即使 API 调用失败，localStorage 中的设置仍然保留
       toast({
-        title: "语言已更新",
-        description: "已保存到本地，刷新页面后生效",
+        title: t("settings.languageUpdatedTitle"),
+        description: t("settings.languageUpdatedLocalDesc"),
       });
     } finally {
       setIsUpdatingLanguage(false);
     }
-  }, [toast]);
+  }, [setI18nLanguage, t, toast]);
 
   // 处理账户删除
   const handleDeleteAccount = async () => {
     if (deleteDialog.confirmation !== "DELETE") {
       toast({
         variant: "destructive",
-        title: "确认文本错误",
-        description: '请输入 "DELETE" 以确认删除账户',
+        title: t("settings.deleteWrongTextTitle"),
+        description: t("settings.deleteWrongTextDesc"),
       });
       return;
     }
@@ -137,8 +135,8 @@ export default function SettingsPage() {
       }
 
       toast({
-        title: "账户已删除",
-        description: "您的账户已被永久删除",
+        title: t("settings.deleteSuccessTitle"),
+        description: t("settings.deleteSuccessDesc"),
       });
 
       // 删除后立即登出并离开 dashboard
@@ -154,8 +152,8 @@ export default function SettingsPage() {
 
       toast({
         variant: "destructive",
-        title: "删除失败",
-        description: error instanceof Error ? error.message : "未知错误",
+        title: t("settings.deleteFailTitle"),
+        description: error instanceof Error ? error.message : t("settings.deleteFailDesc"),
       });
     }
   };
@@ -165,7 +163,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">加载配置中...</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -175,9 +173,9 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">偏好设置</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("settings.title")}</h1>
         <p className="text-muted-foreground">
-          自定义您的使用体验和个性化选项
+          {t("settings.description")}
         </p>
       </div>
 
@@ -186,10 +184,10 @@ export default function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Monitor className="h-5 w-5 text-muted-foreground" />
-            <CardTitle>外观</CardTitle>
+            <CardTitle>{t("settings.appearanceTitle")}</CardTitle>
           </div>
           <CardDescription>
-            选择您喜欢的界面主题
+            {t("settings.appearanceDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -201,8 +199,8 @@ export default function SettingsPage() {
             >
               <Sun className="h-5 w-5" />
               <div className="text-left">
-                <p className="font-medium">浅色</p>
-                <p className="text-xs text-muted-foreground">明亮的界面</p>
+                <p className="font-medium">{t("settings.themeLight")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.themeLightDesc")}</p>
               </div>
             </Button>
             <Button
@@ -212,8 +210,8 @@ export default function SettingsPage() {
             >
               <Moon className="h-5 w-5" />
               <div className="text-left">
-                <p className="font-medium">深色</p>
-                <p className="text-xs text-muted-foreground">暗色的界面</p>
+                <p className="font-medium">{t("settings.themeDark")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.themeDarkDesc")}</p>
               </div>
             </Button>
             <Button
@@ -223,8 +221,8 @@ export default function SettingsPage() {
             >
               <Monitor className="h-5 w-5" />
               <div className="text-left">
-                <p className="font-medium">跟随系统</p>
-                <p className="text-xs text-muted-foreground">自动切换</p>
+                <p className="font-medium">{t("settings.themeSystem")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.themeSystemDesc")}</p>
               </div>
             </Button>
           </div>
@@ -236,28 +234,26 @@ export default function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-muted-foreground" />
-            <CardTitle>语言</CardTitle>
+            <CardTitle>{t("settings.languageTitle")}</CardTitle>
           </div>
           <CardDescription>
-            选择您的界面语言（保存到账户设置）
+            {t("settings.languageDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 sm:max-w-xs">
-            <Label>界面语言</Label>
+            <Label>{t("settings.interfaceLanguage")}</Label>
             <Select value={language} onValueChange={handleLanguageChange} disabled={isUpdatingLanguage}>
               <SelectTrigger>
-                <SelectValue placeholder="选择语言" />
+                <SelectValue placeholder={t("settings.languagePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="zh-CN">简体中文</SelectItem>
-                <SelectItem value="zh-TW">繁體中文</SelectItem>
                 <SelectItem value="en">English</SelectItem>
-                <SelectItem value="ja">日本語</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {isUpdatingLanguage ? "保存中..." : "语言设置已同步到您的账户资料"}
+              {isUpdatingLanguage ? t("settings.languageSaving") : t("settings.languageSynced")}
             </p>
           </div>
         </CardContent>
@@ -269,10 +265,10 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-destructive" />
-              <CardTitle className="text-destructive">危险操作区</CardTitle>
+              <CardTitle className="text-destructive">{t("settings.dangerZone")}</CardTitle>
             </div>
             <CardDescription>
-              这些操作可能会对您的账户产生不可逆的影响
+              {t("settings.dangerZoneDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -280,9 +276,9 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Trash2 className="h-5 w-5 text-destructive" />
                 <div>
-                  <p className="font-medium text-destructive">删除账户</p>
+                  <p className="font-medium text-destructive">{t("settings.deleteAccount")}</p>
                   <p className="text-sm text-muted-foreground">
-                    永久删除您的账户和所有数据，此操作不可逆转
+                    {t("settings.deleteAccountDesc")}
                   </p>
                 </div>
               </div>
@@ -293,7 +289,7 @@ export default function SettingsPage() {
                 }
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                删除账户
+                {t("settings.deleteAccount")}
               </Button>
             </div>
           </CardContent>
@@ -311,27 +307,26 @@ export default function SettingsPage() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>确认删除账户</DialogTitle>
+              <DialogTitle>{t("settings.deleteConfirmTitle")}</DialogTitle>
               <DialogDescription>
-                此操作不可逆转。您的账户和所有数据将被永久删除。
+                {t("settings.deleteConfirmDesc")}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>警告</AlertTitle>
+                <AlertTitle>{t("settings.deleteWarningTitle")}</AlertTitle>
                 <AlertDescription>
-                  删除账户后，您的所有数据（包括个人资料、设置和关联数据）将被永久删除且无法恢复。
+                  {t("settings.deleteWarningDesc")}
                 </AlertDescription>
               </Alert>
               <div className="space-y-2">
-                <Label>确认操作</Label>
+                <Label>{t("common.confirm")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  请输入 <span className="font-mono font-bold">DELETE</span>{" "}
-                  以确认删除您的账户
+                  {t("settings.deleteNeedText")}
                 </p>
                 <Input
-                  placeholder="输入 DELETE"
+                  placeholder={t("settings.deleteInputPlaceholder")}
                   value={deleteDialog.confirmation}
                   onChange={(e) =>
                     setDeleteDialog((prev) => ({
@@ -355,7 +350,7 @@ export default function SettingsPage() {
                   }))
                 }
               >
-                取消
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -365,7 +360,7 @@ export default function SettingsPage() {
                 {deleteDialog.deleting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                确认删除
+                {t("settings.deleteConfirmButton")}
               </Button>
             </DialogFooter>
           </DialogContent>

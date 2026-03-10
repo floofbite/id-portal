@@ -3,6 +3,13 @@
  */
 
 export const zh = {
+  meta: {
+    appTitle: "账户中心",
+    fullTitle: "账户中心 - Logto 门户",
+    description: "管理您的账户信息和个人设置",
+    footer: "Logto 账户门户",
+  },
+
   // Common
   common: {
     loading: "加载中...",
@@ -23,10 +30,15 @@ export const zh = {
     info: "提示",
     optional: "可选",
     required: "必填",
+    toggleTheme: "切换主题",
+    user: "用户",
+    userInitial: "U",
+    emailNotSet: "未设置邮箱",
   },
 
   // Navigation
   nav: {
+    menu: "导航菜单",
     dashboard: "账户概览",
     profile: "个人资料",
     security: "安全设置",
@@ -168,6 +180,72 @@ export const zh = {
     loadError: "加载失败",
     passwordChanged: "密码已更新",
     passwordError: "密码修改失败",
+  },
+
+  service: {
+    status: {
+      normal: "正常",
+      offline: "离线",
+      checking: "检测中",
+      unknown: "未检测",
+    },
+  },
+
+  portal: {
+    title: "服务门户",
+    subtitle: "一站式访问您所有的工作和生活服务",
+    enterAccountCenter: "进入账户中心",
+    searchPlaceholder: "搜索服务...",
+    searchResultCount: "找到 {count} 个服务",
+    searchResults: "搜索结果",
+    clearSearch: "清除搜索",
+    noSearchResults: "没有找到匹配的服务",
+    popular: "热门",
+    popularServices: "常用服务",
+    allServices: "全部服务",
+    refreshStatus: "刷新状态",
+    footerTitle: "关于服务门户",
+    footerDescription: "服务门户汇集了所有接入 Logto 身份认证的服务",
+    footerContent: "所有服务均使用统一的身份认证，无需重复登录。如果您需要访问新的服务，请联系管理员添加。",
+  },
+
+  settings: {
+    title: "偏好设置",
+    description: "自定义您的使用体验和个性化选项",
+    appearanceTitle: "外观",
+    appearanceDescription: "选择您喜欢的界面主题",
+    themeLight: "浅色",
+    themeLightDesc: "明亮的界面",
+    themeDark: "深色",
+    themeDarkDesc: "暗色的界面",
+    themeSystem: "跟随系统",
+    themeSystemDesc: "自动切换",
+    languageTitle: "语言",
+    languageDescription: "选择您的界面语言（保存到账户设置）",
+    interfaceLanguage: "界面语言",
+    languagePlaceholder: "选择语言",
+    languageSaving: "保存中...",
+    languageSynced: "语言设置已同步到您的账户资料",
+    languageUpdatedTitle: "语言已更新",
+    languageUpdatedDesc: "语言偏好已保存到您的账户",
+    languageUpdatedLocalDesc: "已保存到本地，刷新页面后生效",
+    dangerZone: "危险操作区",
+    dangerZoneDesc: "这些操作可能会对您的账户产生不可逆的影响",
+    deleteAccount: "删除账户",
+    deleteAccountDesc: "永久删除您的账户和所有数据，此操作不可逆转",
+    deleteConfirmTitle: "确认删除账户",
+    deleteConfirmDesc: "此操作不可逆转。您的账户和所有数据将被永久删除。",
+    deleteWarningTitle: "警告",
+    deleteWarningDesc: "删除账户后，您的所有数据（包括个人资料、设置和关联数据）将被永久删除且无法恢复。",
+    deleteNeedText: "请输入 DELETE 以确认删除您的账户",
+    deleteInputPlaceholder: "输入 DELETE",
+    deleteConfirmButton: "确认删除",
+    deleteSuccessTitle: "账户已删除",
+    deleteSuccessDesc: "您的账户已被永久删除",
+    deleteFailTitle: "删除失败",
+    deleteFailDesc: "未知错误",
+    deleteWrongTextTitle: "确认文本错误",
+    deleteWrongTextDesc: "请输入 \"DELETE\" 以确认删除账户",
   },
 } as const;
 

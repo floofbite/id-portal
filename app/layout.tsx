@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import LoadingBar from "./components/LoadingBar";
 import { Toaster } from "@/components/ui/toaster";
+import { t } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Account Center - Logto Portal",
-  description: "管理您的账户信息和个人设置",
+  title: t("meta.fullTitle", "zh"),
+  description: t("meta.description", "zh"),
 };
 
 export const viewport: Viewport = {

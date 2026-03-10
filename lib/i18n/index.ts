@@ -1,28 +1,75 @@
 /**
  * 简单国际化 (i18n) 方案
- * 当前仅支持中文，预留多语言扩展
+ * 当前支持中文和 English
  */
 
 import { zh } from "./zh";
+import { en } from "./en";
 
 export const translations = {
   zh,
+  en,
 } as const;
 
 export type Language = keyof typeof translations;
 export type TranslationKey = keyof typeof zh;
 
-const defaultLang: Language = "zh";
+export const LANGUAGE_STORAGE_KEY = "account-center-language";
+export const defaultLang: Language = "zh";
+
+const localeToLangMap: Record<string, Language> = {
+  "zh": "zh",
+  "zh-CN": "zh",
+  "zh-TW": "zh",
+  "en": "en",
+  "en-US": "en",
+  "en-GB": "en",
+};
+
+export function normalizeLocale(input?: string | null): Language {
+  if (!input) {
+    return defaultLang;
+  }
+
+  const exact = localeToLangMap[input];
+  if (exact) {
+    return exact;
+  }
+
+  const byPrefix = Object.entries(localeToLangMap).find(([key]) => input.startsWith(`${key}-`));
+  if (byPrefix) {
+    return byPrefix[1];
+  }
+
+  return defaultLang;
+}
+
+export function readStoredLanguage(): Language {
+  if (typeof window === "undefined") {
+    return defaultLang;
+  }
+
+  const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  return normalizeLocale(stored);
+}
+
+export function saveLanguage(language: Language): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+}
 
 /**
  * 获取翻译
  */
 export function t(
   key: string,
+  language: Language = defaultLang,
   params?: Record<string, string>
 ): string {
-  const lang = defaultLang;
-  const translation = translations[lang];
+  const translation = translations[language] ?? translations[defaultLang];
 
   // 支持嵌套路径，如 "common.save"
   const value = key.split(".").reduce<unknown>((obj, k) => {
@@ -42,11 +89,4 @@ export function t(
   }
 
   return result;
-}
-
-/**
- * React Hook for translations
- */
-export function useTranslations() {
-  return { t };
 }
