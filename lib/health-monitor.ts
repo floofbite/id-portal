@@ -22,6 +22,7 @@ interface HealthMonitorState {
 
 const REFRESH_INTERVAL_MS = 60_000;
 const REQUEST_TIMEOUT_MS = 5_000;
+const HEAD_FALLBACK_STATUS = new Set([405, 501]);
 
 const state: HealthMonitorState = {
   snapshots: {},
@@ -60,11 +61,21 @@ async function probeSingleService(serviceId: string): Promise<ServiceHealthSnaps
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     const startTime = Date.now();
 
-    const response = await fetch(parsedTarget.toString(), {
+    let response = await fetch(parsedTarget.toString(), {
       method: "HEAD",
       signal: controller.signal,
       redirect: "manual",
+      cache: "no-store",
     });
+
+    if (HEAD_FALLBACK_STATUS.has(response.status)) {
+      response = await fetch(parsedTarget.toString(), {
+        method: "GET",
+        signal: controller.signal,
+        redirect: "manual",
+        cache: "no-store",
+      });
+    }
 
     clearTimeout(timeoutId);
 
@@ -72,7 +83,8 @@ async function probeSingleService(serviceId: string): Promise<ServiceHealthSnaps
       serviceId,
       groupName,
       serviceName: service.name,
-      status: response.status < 400 ? "online" : "offline",
+      // 可达性优先：收到响应且状态码 < 500 视为在线（401/403/404/405 等常见于受保护服务）
+      status: response.status < 500 ? "online" : "offline",
       statusCode: response.status,
       latency: Date.now() - startTime,
       checkedAt,
