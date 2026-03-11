@@ -35,6 +35,23 @@ function tryParseCookieValue(
   }
 }
 
+function getErrorStatusCode(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) {
+    return undefined;
+  }
+
+  const candidate = (error as { statusCode?: unknown }).statusCode;
+  return typeof candidate === "number" ? candidate : undefined;
+}
+
+function isReAuthenticationRequired(errorMessage: string, statusCode?: number): boolean {
+  if (statusCode !== 401) {
+    return false;
+  }
+
+  return /re-authenticate|permission\s+denied/i.test(errorMessage);
+}
+
 export async function POST(request: Request) {
   try {
     const { isAuthenticated } = await getLogtoContext();
@@ -112,6 +129,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error("Complete social binding error:", error);
 
+    const statusCode = getErrorStatusCode(error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
     if (errorMessage.includes("identity_already_in_use")) {
@@ -121,6 +139,19 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    if (isReAuthenticationRequired(errorMessage, statusCode)) {
+      return NextResponse.json(
+        {
+          error: "当前操作需要重新验证身份，请输入密码后重试",
+          code: "verification_record.permission_denied",
+        },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: statusCode ?? 500 }
+    );
   }
 }
