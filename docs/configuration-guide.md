@@ -127,7 +127,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 > 注意：前端图标是按 `icon` 字段做映射。未内置的图标会降级为通用图标（不影响功能）。
 > 若你希望某个平台有品牌图标样式，可在 `app/dashboard/connections/page.tsx` 的 `resolveConnectorVisual` 中补一条映射。
 
-**需要注意：在第三方平台回调地址白名单中，除了 Logto 的回调地址外，还应加上本项目回调地址 `/dashboard/connections/social/callback`。**
+**需要注意(下文也有提到)：在第三方平台回调地址白名单中，除了 Logto 的回调地址外，还应加上本项目回调地址 `/dashboard/connections/social/callback?target=...`。**
 
 ### 3) 资料字段配置
 
@@ -158,7 +158,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 ### B. 第三方身份提供商（Google / GitHub / QQ 等）
 
 1. 在对应平台创建 OAuth 应用
-2. 把 Logto 提供的回调地址（redirect URI）**和本项目的回调地址（`/dashboard/connections/social/callback`）**加入白名单
+2. 把 Logto 提供的回调地址（redirect URI）**和本项目的回调地址（`/dashboard/connections/social/callback?target=...`）**加入白名单
 3. 平台拿到的 clientId/clientSecret 填回 Logto connector 配置页
 4. 在本项目的 `features.yaml` 里启用对应 connector（`enabled: true`）并填对 `connectorId`
 
