@@ -2,23 +2,51 @@
 
 基于 **Next.js 15（App Router）** + **Logto** 的账户中心与服务门户。前端页面使用 **shadcn/ui** 构建。
 
-## 零、UI Preview
 
-Dark Mode:
+
+## 一、项目功能
+
+### 账户中心（Dashboard）
+
+- 个人资料管理（头像、姓名、资料字段）
+- 安全设置（密码、MFA、Passkey、登录历史）
+- 社交账号绑定与解绑（Google/GitHub/QQ 等）
+- 登录记录与账户删除
+- 界面语言与明暗切换
+
+### 服务门户（Portal）
+
+- 服务分类导航
+- 关键词搜索
+- 服务可用性探测
+
+
+
+## 二、UI界面预览
+
+Dashboard (Dark Mode):
 
 ![dark mode](docs/assets/overview1.png)
 
-Light Mode:
+Profile (Light Mode):
 
 ![light mode](docs/assets/overview2.png)
 
-Portal Page(Light)
+Security Page (Dark)
+
+![dark mode](docs/assets/overview4.png)
+
+Social Connections (Dark)
+
+![dark mode](docs/assets/overview5.png)
+
+Portal Page (Light)
 
 ![portal page](docs/assets/overview3.png)
 
----
 
-## 一、配置约定
+
+## 三、配置约定
 
 无论本地开发还是 Docker 部署，统一使用以下路径：
 
@@ -32,9 +60,9 @@ Portal Page(Light)
 - `/deploy/features.yaml.example`
 - `/deploy/services.yaml.example`
 
----
 
-## 二、本地开发
+
+## 四、本地开发
 
 ### 1) 安装依赖
 
@@ -62,9 +90,9 @@ npm run dev
 
 访问：`http://localhost:3000`
 
----
 
-## 三、Docker 部署
+
+## 五、Docker 部署
 
 ### 1) 准备部署目录
 
@@ -97,26 +125,9 @@ docker compose up -d
 docker compose logs -f app
 ```
 
----
 
-## 四、项目功能
 
-### 账户中心（Dashboard）
-
-- 个人资料管理（头像、姓名、资料字段）
-- 安全设置（密码、MFA、Passkey、登录历史）
-- 社交账号绑定与解绑（Google/GitHub/QQ 等）
-- 会话管理与账户删除（可按 features 控制）
-
-### 服务门户（Portal）
-
-- 服务分类导航
-- 关键词搜索
-- 服务可用性探测（通过 groupName/serviceName 的受控检查接口）
-
----
-
-## 五、项目特色
+## 六、项目特色
 
 - **统一配置模型**：开发与部署都使用 `.env + deploy/*.yaml`
 - **运行时配置加载**：配置修改后重启容器即可生效
@@ -124,8 +135,14 @@ docker compose logs -f app
 - **认证边界清晰**：区分用户 Token 与 M2M Token，降低权限误用风险
 - **前后端解耦**：Client 通过 `/api/public-config` 获取公开配置
 
----
 
-## 六、配置说明
+
+## 七、配置说明
 
 详见：`docs/configuration-guide.md`
+
+
+
+## 八、开源协议
+
+[MPL-2.0 License](LICENSE)

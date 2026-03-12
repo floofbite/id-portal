@@ -1,4 +1,4 @@
-# 配置指南（部署必读）
+# 配置指南
 
 本指南专门说明三类配置：
 
@@ -9,12 +9,6 @@
 ---
 
 ## 一、.env 怎么配（Logto + 应用基础）
-
-先复制模板：
-
-```bash
-cp .env.example .env
-```
 
 ### 1) 必填项（不填会启动失败或无法登录）
 
@@ -50,12 +44,6 @@ cp .env.example .env
 
 ## 二、services.yaml 怎么配（服务门户）
 
-先复制模板：
-
-```bash
-cp deploy/services.yaml.example deploy/services.yaml
-```
-
 ### 1) 文件结构
 
 - `serviceCategories[]`：服务分类
@@ -86,7 +74,7 @@ cp deploy/services.yaml.example deploy/services.yaml
 cp deploy/features.yaml.example deploy/features.yaml
 ```
 
-### 1) 主要开关
+### 1. 主要开关
 
 - `features.emailChange.enabled`
 - `features.phoneChange.enabled`
@@ -96,7 +84,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 - `features.mfa.*.enabled`
 - `features.passkey.enabled`
 
-### 2) 社交连接器配置
+### 2. 社交连接器配置
 
 路径：`features.socialIdentities.config.connectors[]`
 
@@ -109,7 +97,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 
 > 这里的 `connectorId` 是**必须和 Logto 后台对应**的关键字段。
 
-### 2.1 对“更多社交登录方式”的适配性说明
+### 2.1 对更多社交登录方式的适配性说明
 
 当前项目对社交登录是**配置驱动**的，扩展性较好：
 
@@ -129,7 +117,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 
 **需要注意(下文也有提到)：在第三方平台回调地址白名单中，除了 Logto 的回调地址外，还应加上本项目回调地址 `/dashboard/connections/social/callback?target=...`。**
 
-### 3) 资料字段配置
+### 3. 资料字段配置
 
 路径：`profileFields.*`
 
@@ -139,7 +127,7 @@ cp deploy/features.yaml.example deploy/features.yaml
 
 ## 四、多平台配置指引
 
-这一部分对应你提到的“平台多、容易绕”的问题，按顺序配基本不会错。
+
 
 ### A. Logto 控制台
 
