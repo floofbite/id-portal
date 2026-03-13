@@ -1,3 +1,11 @@
+portalContent:
+  # 可选：设置为 true 时，门户副标题/底部说明仅使用这里的文案，不走 i18n 默认文案。
+  noI18n: false
+  # subtitle: 一站式访问您所有的工作和生活服务
+  # footerTitle: 关于服务门户
+  # footerDescription: 服务门户汇集了所有接入 Logto 身份认证的服务
+  # footerContent: 所有服务均使用统一的身份认证，无需重复登录。如果您需要访问新的服务，请联系管理员添加。
+
 serviceCategories:
   - id: security
     name: 安全工具

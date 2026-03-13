@@ -100,6 +100,16 @@ const featuresYamlSchema = z
 
 const servicesYamlSchema = z
   .object({
+    portalContent: z
+      .object({
+        subtitle: z.string().min(1).optional(),
+        footerTitle: z.string().min(1).optional(),
+        footerDescription: z.string().min(1).optional(),
+        footerContent: z.string().min(1).optional(),
+        noI18n: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     serviceCategories: z
       .array(
         z
@@ -138,6 +148,13 @@ interface RuntimeConfigData {
   profileFields: ProfileFieldsConfig;
   serviceCategories: ServiceCategory[];
   services: Service[];
+  portalContent?: {
+    subtitle?: string;
+    footerTitle?: string;
+    footerDescription?: string;
+    footerContent?: string;
+    noI18n?: boolean;
+  };
   configHash: string;
 }
 
@@ -232,6 +249,7 @@ function loadFromMountedConfig(configDir: string): RuntimeConfigData | null {
     profileFields: parsedFeatures.profileFields,
     serviceCategories: parsedServices.serviceCategories,
     services: parsedServices.services,
+    portalContent: parsedServices.portalContent,
     configHash,
   };
 }
@@ -249,6 +267,7 @@ export const features = runtimeData.features;
 export const profileFields = runtimeData.profileFields;
 export const serviceCategories = runtimeData.serviceCategories;
 export const services = runtimeData.services;
+export const portalContent = runtimeData.portalContent;
 export const configHash = runtimeData.configHash;
 
 export function getPublicRuntimeConfig(): PublicRuntimeConfig {
@@ -258,6 +277,7 @@ export function getPublicRuntimeConfig(): PublicRuntimeConfig {
     profileFields,
     serviceCategories,
     services,
+    portalContent,
     configHash,
   };
 }

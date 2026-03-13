@@ -13,4 +13,5 @@ services:
       - ./.env:/app/deploy/.env:ro
       - ./deploy/features.yaml:/app/deploy/features.yaml:ro
       - ./deploy/services.yaml:/app/deploy/services.yaml:ro
+      # - ./deploy/icons:/app/public/icons:ro
     restart: unless-stopped

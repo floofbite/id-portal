@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslations } from "@/lib/i18n/client";
+import { resolveIconSource } from "@/lib/icon-resolver";
+import { IconImageFallback } from "@/components/shared/icon-image-fallback";
 
 type SocialIdentity = {
   target: string;
@@ -66,6 +68,8 @@ const iconStyleByKey: Record<string, string> = {
 };
 
 function resolveConnectorVisual(icon: string | undefined) {
+  const resolvedIcon = resolveIconSource(icon);
+
   switch ((icon || "").toLowerCase()) {
     case "google":
       return {
@@ -110,7 +114,16 @@ function resolveConnectorVisual(icon: string | undefined) {
     default:
       return {
         className: "bg-muted",
-        element: <Globe className="h-6 w-6" />,
+        element: resolvedIcon ? (
+          <IconImageFallback
+            src={resolvedIcon}
+            alt="connector icon"
+            className="h-6 w-6 rounded-sm object-contain"
+            fallback={<Globe className="h-6 w-6" />}
+          />
+        ) : (
+          <Globe className="h-6 w-6" />
+        ),
       };
   }
 }

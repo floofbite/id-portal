@@ -69,11 +69,20 @@ export interface Service {
   isPopular?: boolean;
 }
 
+export interface PortalContentConfig {
+  subtitle?: string;
+  footerTitle?: string;
+  footerDescription?: string;
+  footerContent?: string;
+  noI18n?: boolean;
+}
+
 export interface PublicRuntimeConfig {
   logtoEndpoint: string | null;
   features: FeaturesConfig;
   profileFields: ProfileFieldsConfig;
   serviceCategories: ServiceCategory[];
   services: Service[];
+  portalContent?: PortalContentConfig;
   configHash: string;
 }

@@ -77,6 +77,16 @@ const featuresSchema = z
 
 const servicesSchema = z
   .object({
+    portalContent: z
+      .object({
+        subtitle: z.string().min(1).optional(),
+        footerTitle: z.string().min(1).optional(),
+        footerDescription: z.string().min(1).optional(),
+        footerContent: z.string().min(1).optional(),
+        noI18n: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     serviceCategories: z
       .array(
         z

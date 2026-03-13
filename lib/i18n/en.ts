@@ -244,6 +244,7 @@ export const en = {
     footerTitle: "About Service Portal",
     footerDescription: "The service portal gathers all services integrated with Logto identity authentication",
     footerContent: "All services use unified authentication, so you can avoid repeated sign-in.",
+    headerAction: "Go to Account Center",
   },
 
   settings: {

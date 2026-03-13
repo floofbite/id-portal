@@ -9,7 +9,6 @@ import { Search, Sparkles, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePublicConfig } from "@/hooks/use-public-config";
 import type { Service, ServiceCategory } from "@/config/types";
-import Link from "next/link";
 import { useTranslations } from "@/lib/i18n/client";
 
 // 服务状态类型
@@ -38,6 +37,17 @@ export default function PortalPage() {
     () => runtimeConfig?.services ?? [],
     [runtimeConfig]
   );
+  const portalContent = runtimeConfig?.portalContent;
+  const disablePortalI18n = portalContent?.noI18n === true;
+  const portalSubtitle =
+    portalContent?.subtitle ?? (disablePortalI18n ? "" : t("portal.subtitle"));
+  const footerTitle =
+    portalContent?.footerTitle ?? (disablePortalI18n ? "" : t("portal.footerTitle"));
+  const footerDescription =
+    portalContent?.footerDescription ??
+    (disablePortalI18n ? "" : t("portal.footerDescription"));
+  const footerContent =
+    portalContent?.footerContent ?? (disablePortalI18n ? "" : t("portal.footerContent"));
   const runtimeCategories = useMemo<ServiceCategory[]>(
     () => runtimeConfig?.serviceCategories ?? [],
     [runtimeConfig]
@@ -174,14 +184,7 @@ export default function PortalPage() {
           <Sparkles className="h-6 w-6 text-white" />
         </div>
         <h1 className="text-3xl font-bold tracking-tight">{t("portal.title")}</h1>
-        <p className="mt-2 text-muted-foreground">
-          {t("portal.subtitle")}
-        </p>
-        <div className="mt-4">
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm">{t("portal.enterAccountCenter")}</Button>
-          </Link>
-        </div>
+        {portalSubtitle ? <p className="mt-2 text-muted-foreground">{portalSubtitle}</p> : null}
 
         {/* Search */}
         <div className="mx-auto mt-6 max-w-md">
@@ -306,19 +309,19 @@ export default function PortalPage() {
       )}
 
       {/* Footer Info */}
-      <Card className="bg-muted/50">
-        <CardHeader>
-          <CardTitle className="text-base">{t("portal.footerTitle")}</CardTitle>
-          <CardDescription>
-            {t("portal.footerDescription")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {t("portal.footerContent")}
-          </p>
-        </CardContent>
-      </Card>
+      {(footerTitle || footerDescription || footerContent) && (
+        <Card className="bg-muted/50">
+          <CardHeader>
+            {footerTitle ? <CardTitle className="text-base">{footerTitle}</CardTitle> : null}
+            {footerDescription ? <CardDescription>{footerDescription}</CardDescription> : null}
+          </CardHeader>
+          {footerContent ? (
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{footerContent}</p>
+            </CardContent>
+          ) : null}
+        </Card>
+      )}
     </div>
   );
 }

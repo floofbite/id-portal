@@ -68,12 +68,6 @@
 
 ## 三、features.yaml 怎么配（账户中心功能）
 
-先复制模板：
-
-```bash
-cp deploy/features.yaml.example deploy/features.yaml
-```
-
 ### 1. 主要开关
 
 - `features.emailChange.enabled`
@@ -126,8 +120,6 @@ cp deploy/features.yaml.example deploy/features.yaml
 ---
 
 ## 四、多平台配置指引
-
-
 
 ### A. Logto 控制台
 
@@ -228,3 +220,89 @@ docker compose restart app
   - `lib/i18n/zh.ts`
   - `lib/i18n/en.ts`
 - 在 client 组件中通过 `useTranslations()` 读取文案。
+
+---
+
+## 八、图标来源与扩展兼容说明
+
+### 1) 当前页面图标来源
+
+- **Portal 页面（`/portal`）**
+  - 配置来源在：`deploy/services.yaml` 的 `services[].icon`
+  - `services[].iconName` 仅作为兜底图标使用。
+  
+- **社交连接页面（`/dashboard/connections`）**
+  - 配置来源在：`deploy/features.yaml` 的 `features.socialIdentities.config.connectors[].icon`
+  - 对 `google/github/apple/discord/slack/linkedin/wechat/qq` 内置品牌图标优先展示；
+    其他值走通用图标解析器。
+
+### 2) 图标兼容格式
+
+当前支持以下写法（服务门户与社交连接器通用）：
+
+- Dashboard Icons（默认）
+  - `icon: sonarr`
+  - `icon: sonarr.svg` / `icon: sonarr.png` / `icon: sonarr.webp`
+- Material Design Icons
+  - `icon: mdi:docker`
+  - `icon: mdi-docker`
+- Simple Icons
+  - `icon: si:github`
+  - `icon: si-github`
+  - `icon: si-github-#181717`（带颜色）
+- selfh.st 图标
+  - `icon: sh:proxmox`
+  - `icon: sh-proxmox`
+  - `icon: selfh-proxmox`
+- 远程绝对 URL
+  - `icon: https://example.com/icon.svg`
+- 本地静态资源
+  - `icon: /icons/my-icon.png`
+
+> 说明：图标加载失败时会自动回退到默认图标，不影响功能。
+
+### 3) 图标目录挂载（Docker）
+
+如果你使用自定义本地图标（例如 `icon: /icons/demo.svg`），请把图标放在：
+
+- 主机目录：`./deploy/icons/`
+- 容器目录：`/app/public/icons/`
+
+本项目 compose 已包含挂载(需要用到时取消注释)：
+
+```yaml
+- ./deploy/icons:/app/public/icons:ro
+```
+
+使用方式示例：
+
+- 文件放在 `deploy/icons/demo.svg`
+- 配置写 `icon: /icons/demo.svg`
+
+### 4) 什么是 Dashboard Icons / Material Design Icons / Simple Icons / selfh.st 图标？
+
+`Dashboard Icons` 指的是一个面向自托管应用的图标库项目,你在配置中写 `icon: sonarr` 或 `icon: sonarr.svg` 这类名称时，会按该图标库解析。
+
+`Material Design Icons` 和 `Simple Icons` 是两个流行的图标库，分别提供了丰富的品牌和通用图标。通过在 `icon` 字段使用特定前缀（如 `mdi:` 或 `si:`），你可以直接引用这些库中的图标。
+
+`selfh.st` 是一个提供自托管应用图标的服务，类似于 Dashboard Icons，但通过在线 API 提供图标访问。使用 `sh:` 前缀可以从该服务获取图标。
+
+
+---
+
+## 九、Portal 文案配置（可选）
+
+你可以在 `deploy/services.yaml` 顶层增加 `portalContent`，来自定义 Portal 页面文案。
+
+```yaml
+portalContent:
+  # true: 这几处文案只使用这里配置的内容；不再使用 i18n 默认文案
+  # false 或不填: 若某项没配，回退到系统默认文案
+  noI18n: false
+
+  # subtitle: 一站式访问您所有的工作和生活服务
+  # footerTitle: 关于服务门户
+  # footerDescription: 服务门户汇集了所有接入 Logto 身份认证的服务
+  # footerContent: 所有服务均使用统一的身份认证，无需重复登录。如果您需要访问新的服务，请联系管理员添加。
+```
+
