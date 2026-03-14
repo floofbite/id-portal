@@ -69,10 +69,11 @@ const iconStyleByKey: Record<string, string> = {
   qq: "bg-[#12B7F5] text-white",
 };
 
-function resolveConnectorVisual(icon: string | undefined) {
-  const resolvedIcon = resolveIconSource(icon);
+function resolveConnectorVisual(icon: string | undefined, target: string) {
+  const sourceKey = (icon ?? target).trim();
+  const resolvedIcon = resolveIconSource(sourceKey);
 
-  switch ((icon || "").toLowerCase()) {
+  switch (sourceKey.toLowerCase()) {
     case "google":
       return {
         className: iconStyleByKey.google,
@@ -337,7 +338,7 @@ export default function ConnectionsPage() {
                 (c) => c.target === identity.target
               );
               const connectorName = connector?.name || identity.target;
-              const visual = resolveConnectorVisual(connector?.icon);
+              const visual = resolveConnectorVisual(connector?.icon, identity.target);
 
               return (
                 <div key={`${identity.target}-${idx}`}>
@@ -399,7 +400,7 @@ export default function ConnectionsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {unconnectedConnectors.map((connector, idx) => {
-              const visual = resolveConnectorVisual(connector.icon);
+              const visual = resolveConnectorVisual(connector.icon, connector.target);
 
               return (
                 <div key={connector.target}>

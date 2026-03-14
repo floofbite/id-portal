@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 interface IconImageFallbackProps {
   src: string;
@@ -11,6 +11,10 @@ interface IconImageFallbackProps {
 
 export function IconImageFallback({ src, alt, className, fallback }: IconImageFallbackProps) {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
 
   const imageClassName = useMemo(() => className ?? "h-6 w-6 object-contain", [className]);
 

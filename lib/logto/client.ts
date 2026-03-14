@@ -13,10 +13,58 @@ import {
 
 import { logtoConfig } from "./config";
 
+type LogtoContext = Awaited<ReturnType<typeof _getLogtoContext>>;
+
+async function canFetchAccountInfo(accessToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${logtoConfig.endpoint}/api/my-account`, {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    // 网络抖动等场景不直接判定为未登录，避免误伤有效会话
+    return true;
+  }
+}
+
 /**
  * 获取 Logto 上下文（认证状态）
  */
-export const getLogtoContext = () => _getLogtoContext(logtoConfig);
+export async function getLogtoContext(): Promise<LogtoContext> {
+  const context = await _getLogtoContext(logtoConfig);
+
+  if (!context.isAuthenticated) {
+    return context;
+  }
+
+  const accessToken = await _getAccessTokenRSC(logtoConfig);
+  if (!accessToken) {
+    return {
+      ...context,
+      isAuthenticated: false,
+    };
+  }
+
+  const accountAccessible = await canFetchAccountInfo(accessToken);
+  if (!accountAccessible) {
+    return {
+      ...context,
+      isAuthenticated: false,
+      claims: undefined,
+    };
+  }
+
+  return context;
+}
 
 /**
  * 登录

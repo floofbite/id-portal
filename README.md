@@ -1,8 +1,8 @@
-# Logto Account Center & Portal
+# Logto Account Portal
 
-基于 **Next.js 15（App Router）** + **Logto** 的账户中心与服务门户。前端页面使用 **shadcn/ui** 构建。
+Logto Account Portal 是一个对接 Logto 的账户中心和服务门户，提供用户资料管理、安全设置、社交账号绑定等功能。支持本地开发和 Docker 部署，配置统一且易于管理。
 
-
+项目基于 Next.js 15 (App Router) 构建，前端页面使用 shadcn/ui 组件库。
 
 ## 一、项目功能
 
@@ -16,10 +16,10 @@
 
 ### 服务门户（Portal）
 
+- 基于配置文件的服务展示
 - 服务分类导航
 - 关键词搜索
 - 服务可用性探测
-
 
 
 ## 二、UI界面预览

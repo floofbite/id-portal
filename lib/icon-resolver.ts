@@ -7,6 +7,10 @@ function normalizeIconInput(icon: string): string {
   return icon.trim();
 }
 
+function stripPrefix(value: string, pattern: RegExp): string {
+  return value.replace(pattern, "");
+}
+
 function stripExtension(value: string): { name: string; ext?: "svg" | "png" | "webp" } {
   const matched = value.match(/\.(svg|png|webp)$/i);
   if (!matched) {
@@ -20,7 +24,7 @@ function stripExtension(value: string): { name: string; ext?: "svg" | "png" | "w
 }
 
 function resolveMdiIcon(icon: string): string | null {
-  const token = icon.startsWith("mdi:") ? icon.slice(4) : icon.slice(4);
+  const token = stripPrefix(icon, /^mdi[:\-]/i);
   if (!token) {
     return null;
   }
@@ -30,7 +34,7 @@ function resolveMdiIcon(icon: string): string | null {
 }
 
 function resolveSimpleIcon(icon: string): string | null {
-  const token = icon.startsWith("si:") ? icon.slice(3) : icon.slice(3);
+  const token = stripPrefix(icon, /^si[:\-]/i);
   if (!token) {
     return null;
   }
@@ -51,11 +55,7 @@ function resolveSimpleIcon(icon: string): string | null {
 }
 
 function resolveSelfhIcon(icon: string): string | null {
-  const token = icon.startsWith("sh:")
-    ? icon.slice(3)
-    : icon.startsWith("sh-")
-      ? icon.slice(3)
-      : icon.slice(6);
+  const token = stripPrefix(icon, /^(?:sh[:\-]|selfh-)/i);
 
   if (!token) {
     return null;
@@ -90,19 +90,19 @@ export function resolveIconSource(icon?: string): string | null {
     return normalized;
   }
 
-  if (normalized.startsWith("mdi:") || normalized.startsWith("mdi-")) {
+  if (/^icons\//i.test(normalized)) {
+    return `/${normalized}`;
+  }
+
+  if (/^mdi[:\-]/i.test(normalized)) {
     return resolveMdiIcon(normalized);
   }
 
-  if (normalized.startsWith("si:") || normalized.startsWith("si-")) {
+  if (/^si[:\-]/i.test(normalized)) {
     return resolveSimpleIcon(normalized);
   }
 
-  if (
-    normalized.startsWith("sh:") ||
-    normalized.startsWith("sh-") ||
-    normalized.startsWith("selfh-")
-  ) {
+  if (/^(?:sh[:\-]|selfh-)/i.test(normalized)) {
     return resolveSelfhIcon(normalized);
   }
 

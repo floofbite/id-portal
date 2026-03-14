@@ -1,4 +1,4 @@
-import { getLogtoContext, getAccountInfo, signOut } from "@/lib/logto";
+import { getLogtoContext, getAccountInfo, signOut, LogtoApiError } from "@/lib/logto";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Navbar } from "@/components/layout/navbar";
@@ -21,6 +21,10 @@ export default async function DashboardLayout({
   try {
     accountInfo = await getAccountInfo();
   } catch (error) {
+    if (error instanceof LogtoApiError && (error.statusCode === 401 || error.statusCode === 403)) {
+      redirect("/sign-in");
+    }
+
     logger.error("Failed to get account info", error);
   }
 
