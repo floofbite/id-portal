@@ -1,6 +1,8 @@
 # Logto Account Portal
 
-Logto Account Portal 是一个对接 Logto 的账户中心和服务门户，提供用户资料管理、安全设置、社交账号绑定等功能。支持本地开发和 Docker 部署，配置统一且易于管理。
+> 简体中文 | [English](README.en.md)
+
+Logto Account Portal 是一个对接 [Logto](https://logto.io/) 的账户中心和服务门户，提供用户资料管理、安全设置、社交账号绑定等功能。支持本地开发和 Docker 部署，配置统一且易于管理。
 
 项目基于 Next.js 15 (App Router) 构建，前端页面使用 shadcn/ui 组件库。
 
