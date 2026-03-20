@@ -63,7 +63,7 @@ export default function SocialCallbackPage() {
       throw new Error("未获取到有效的社交授权数据");
     }
 
-    const res = await fetch("/api/account/identities/social/complete", {
+    const res = await fetch("/me/api/account/identities/social/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -158,7 +158,7 @@ export default function SocialCallbackPage() {
     setSubmitting(true);
 
     try {
-      const verifyRes = await fetch("/api/verifications/password", {
+      const verifyRes = await fetch("/me/api/verifications/password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),

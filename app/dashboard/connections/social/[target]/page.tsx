@@ -18,7 +18,7 @@ export default function SocialConnectPage({
 
     const startBinding = async () => {
       try {
-        const res = await fetch("/api/account/identities/social/start", {
+        const res = await fetch("/me/api/account/identities/social/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ target }),
