@@ -86,7 +86,7 @@ export default function ProfilePage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch("/api/account-info");
+      const res = await fetch("/me/api/account-info");
       if (!res.ok) {
         if (res.status === 401) {
           router.push("/");
@@ -98,11 +98,11 @@ export default function ProfilePage() {
       setAccountInfo(data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
-       toast({
-         variant: "destructive",
-         title: t("toast.loadError"),
-         description: t("toast.loadErrorDesc"),
-       });
+      toast({
+        variant: "destructive",
+        title: t("toast.loadError"),
+        description: t("toast.loadErrorDesc"),
+      });
     } finally {
       setLoading(false);
     }
@@ -141,8 +141,8 @@ export default function ProfilePage() {
 
     try {
       const endpoint = field === "avatar" || field === "name" || field === "username"
-        ? "/api/account/profile"
-        : "/api/account/profile/details";
+        ? "/me/api/account/profile"
+        : "/me/api/account/profile/details";
 
       const body = field === "avatar" || field === "name" || field === "username"
         ? { [field]: value || null }
@@ -155,9 +155,9 @@ export default function ProfilePage() {
       });
 
       if (!res.ok) {
-         const body = await res.json().catch(() => ({}));
-         throw new Error(body?.error || t("toast.updateError"));
-       }
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || t("toast.updateError"));
+      }
 
       await fetchData();
       router.refresh();
@@ -167,10 +167,10 @@ export default function ProfilePage() {
         [field]: { ...prev[field], open: false, saving: false },
       }));
 
-       toast({
-         title: t("toast.saveSuccess"),
-         description: t("toast.profileUpdated"),
-       });
+      toast({
+        title: t("toast.saveSuccess"),
+        description: t("toast.profileUpdated"),
+      });
     } catch (error) {
       console.error("Update error:", error);
       setFormStates((prev) => ({
@@ -178,11 +178,11 @@ export default function ProfilePage() {
         [field]: { ...prev[field], saving: false },
       }));
 
-       toast({
-         variant: "destructive",
-         title: t("toast.saveError"),
-         description: error instanceof Error ? error.message : t("toast.unknownError"),
-       });
+      toast({
+        variant: "destructive",
+        title: t("toast.saveError"),
+        description: error instanceof Error ? error.message : t("toast.unknownError"),
+      });
     }
   };
 
@@ -217,11 +217,11 @@ export default function ProfilePage() {
   if (loading || (configLoading && !runtimeConfig)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-         <div className="text-center">
-           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-           <p className="text-muted-foreground">{t("common.loading")}</p>
-         </div>
-       </div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
+        </div>
+      </div>
     );
   }
 
@@ -234,11 +234,11 @@ export default function ProfilePage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-         <h1 className="text-2xl font-bold tracking-tight">{t("profile.title")}</h1>
-         <p className="text-muted-foreground">
-           {t("profile.description")}
-         </p>
-       </div>
+        <h1 className="text-2xl font-bold tracking-tight">{t("profile.title")}</h1>
+        <p className="text-muted-foreground">
+          {t("profile.description")}
+        </p>
+      </div>
 
       {/* Avatar Card */}
       {avatarConfig && avatarConfig.enabled && (
@@ -292,20 +292,20 @@ export default function ProfilePage() {
                         />
                       </div>
                     </div>
-                     <DialogFooter>
-                       <DialogClose asChild>
-                         <Button variant="outline" disabled={getFormState("avatar").saving}>
-                           {t("common.cancel")}
-                         </Button>
-                       </DialogClose>
-                       <Button
-                         onClick={() => handleUpdateProfile("avatar", getFormState("avatar").value)}
-                         disabled={getFormState("avatar").saving}
-                       >
-                         {getFormState("avatar").saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                         {t("common.save")}
-                       </Button>
-                     </DialogFooter>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" disabled={getFormState("avatar").saving}>
+                          {t("common.cancel")}
+                        </Button>
+                      </DialogClose>
+                      <Button
+                        onClick={() => handleUpdateProfile("avatar", getFormState("avatar").value)}
+                        disabled={getFormState("avatar").saving}
+                      >
+                        {getFormState("avatar").saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t("common.save")}
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -325,9 +325,9 @@ export default function ProfilePage() {
       )}
 
       {/* Profile Cards Grid */}
-       {enabledFields.length > 0 && (
-         <div>
-           <h3 className="mb-4 text-lg font-semibold">{t("profile.basicInfo")}</h3>
+      {enabledFields.length > 0 && (
+        <div>
+          <h3 className="mb-4 text-lg font-semibold">{t("profile.basicInfo")}</h3>
           <div className="grid items-stretch gap-4 lg:gap-6 sm:grid-cols-2">
             {enabledFields.map(({ key, config }) => {
               const Icon = iconMap[key];
@@ -354,19 +354,19 @@ export default function ProfilePage() {
                       </div>
                       <CardDescription>{getProfileValue(key) || config.description}</CardDescription>
                     </CardHeader>
-                     <CardContent>
-                       <DialogTrigger asChild>
-                         <Button variant="outline" size="sm">
-                           {getProfileValue(key) ? t("common.edit") : t("common.add")}
-                         </Button>
-                       </DialogTrigger>
-                     </CardContent>
+                    <CardContent>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {getProfileValue(key) ? t("common.edit") : t("common.add")}
+                        </Button>
+                      </DialogTrigger>
+                    </CardContent>
                   </Card>
-                   <DialogContent>
-                     <DialogHeader>
-                       <DialogTitle>{t("profile.editField", { label: config.label })}</DialogTitle>
-                       <DialogDescription>{config.description}</DialogDescription>
-                     </DialogHeader>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t("profile.editField", { label: config.label })}</DialogTitle>
+                      <DialogDescription>{config.description}</DialogDescription>
+                    </DialogHeader>
                     <div className="py-4">
                       <Label>{config.label}</Label>
                       <Input
@@ -376,20 +376,20 @@ export default function ProfilePage() {
                         type={config.inputType}
                       />
                     </div>
-                     <DialogFooter>
-                       <DialogClose asChild>
-                         <Button variant="outline" disabled={formState.saving}>
-                           {t("common.cancel")}
-                         </Button>
-                       </DialogClose>
-                       <Button
-                         onClick={() => handleUpdateProfile(key, formState.value)}
-                         disabled={formState.saving}
-                       >
-                         {formState.saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                         {t("common.save")}
-                       </Button>
-                     </DialogFooter>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" disabled={formState.saving}>
+                          {t("common.cancel")}
+                        </Button>
+                      </DialogClose>
+                      <Button
+                        onClick={() => handleUpdateProfile(key, formState.value)}
+                        disabled={formState.saving}
+                      >
+                        {formState.saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t("common.save")}
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               );
@@ -398,92 +398,92 @@ export default function ProfilePage() {
         </div>
       )}
 
-       {/* Contact Info - 使用 Logto Account Center UI */}
-       <Card>
-         <CardHeader>
-           <CardTitle>{t("profile.contactInfo")}</CardTitle>
-           <CardDescription>
-             {t("profile.contactInfoDesc")}
-           </CardDescription>
-         </CardHeader>
+      {/* Contact Info - 使用 Logto Account Center UI */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("profile.contactInfo")}</CardTitle>
+          <CardDescription>
+            {t("profile.contactInfoDesc")}
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
           {/* Email */}
           <div className="flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <Mail className="h-5 w-5 text-muted-foreground" />
-               <div>
-                 <p className="font-medium">{t("profile.fields.email")}</p>
-                 <p className="text-sm text-muted-foreground">
-                   {accountInfo?.primaryEmail || t("profile.notSet")}
-                 </p>
-               </div>
-             </div>
-              {isFeatureEnabled("emailChange") && emailAccountCenterUrl ? (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={emailAccountCenterUrl} target="_self">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    {accountInfo?.primaryEmail ? t("common.edit") : t("common.add")}
-                  </a>
-               </Button>
-             ) : (
-               <Button variant="outline" size="sm" disabled>
-                 {t("profile.notAllowed")}
-               </Button>
-             )}
+            <div className="flex items-center gap-3">
+              <Mail className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{t("profile.fields.email")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {accountInfo?.primaryEmail || t("profile.notSet")}
+                </p>
+              </div>
+            </div>
+            {isFeatureEnabled("emailChange") && emailAccountCenterUrl ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={emailAccountCenterUrl} target="_self">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {accountInfo?.primaryEmail ? t("common.edit") : t("common.add")}
+                </a>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                {t("profile.notAllowed")}
+              </Button>
+            )}
           </div>
 
           <Separator />
 
           {/* Phone */}
           <div className="flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <Smartphone className="h-5 w-5 text-muted-foreground" />
-               <div>
-                 <p className="font-medium">{t("profile.fields.phone")}</p>
-                 <p className="text-sm text-muted-foreground">
-                   {accountInfo?.primaryPhone || t("profile.notSet")}
-                 </p>
-               </div>
-             </div>
-              {isFeatureEnabled("phoneChange") && phoneAccountCenterUrl ? (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={phoneAccountCenterUrl} target="_self">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    {accountInfo?.primaryPhone ? t("common.edit") : t("common.add")}
-                  </a>
-               </Button>
-             ) : (
-               <Button variant="outline" size="sm" disabled>
-                 {t("profile.notAllowed")}
-               </Button>
-             )}
+            <div className="flex items-center gap-3">
+              <Smartphone className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{t("profile.fields.phone")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {accountInfo?.primaryPhone || t("profile.notSet")}
+                </p>
+              </div>
+            </div>
+            {isFeatureEnabled("phoneChange") && phoneAccountCenterUrl ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={phoneAccountCenterUrl} target="_self">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {accountInfo?.primaryPhone ? t("common.edit") : t("common.add")}
+                </a>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                {t("profile.notAllowed")}
+              </Button>
+            )}
           </div>
 
           <Separator />
 
           {/* Username */}
           <div className="flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <User className="h-5 w-5 text-muted-foreground" />
-               <div>
-                 <p className="font-medium">{t("profile.fields.username")}</p>
-                 <p className="text-sm text-muted-foreground">
-                   @{accountInfo?.username || t("profile.notSet")}
-                 </p>
-               </div>
-             </div>
-              {isFeatureEnabled("usernameChange") && usernameAccountCenterUrl ? (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={usernameAccountCenterUrl} target="_self">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    {t("common.edit")}
-                  </a>
-               </Button>
-             ) : (
-               <Button variant="outline" size="sm" disabled>
-                 {t("profile.notAllowed")}
-               </Button>
-             )}
+            <div className="flex items-center gap-3">
+              <User className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{t("profile.fields.username")}</p>
+                <p className="text-sm text-muted-foreground">
+                  @{accountInfo?.username || t("profile.notSet")}
+                </p>
+              </div>
+            </div>
+            {isFeatureEnabled("usernameChange") && usernameAccountCenterUrl ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={usernameAccountCenterUrl} target="_self">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {t("common.edit")}
+                </a>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                {t("profile.notAllowed")}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
