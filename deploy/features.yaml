@@ -51,7 +51,7 @@ features:
         #   icon: apple
         #   description: Apple
         #
-        - target: 9f2n8c8uofrqb7c4dxnmc
+        - target: discord
           connectorId: 9f2n8c8uofrqb7c4dxnmc
           enabled: true
           displayName: Discord
