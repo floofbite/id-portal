@@ -5,7 +5,7 @@ import type { PublicRuntimeConfig } from "@/config/types";
 
 export function usePublicConfig() {
   return useFetch<PublicRuntimeConfig>({
-    url: "./api/public-config",
+    url: "/me/api/public-config",
     immediate: true,
   });
 }
