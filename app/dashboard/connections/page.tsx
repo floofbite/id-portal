@@ -9,10 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Link2,
-  CheckCircle,
-  AlertTriangle,
+  CircleCheckBig,
+  TriangleAlert,
   ExternalLink,
-  Loader2,
+  LoaderCircle,
   Globe,
 } from "lucide-react";
 import {
@@ -316,7 +316,7 @@ export default function ConnectionsPage() {
       </div>
 
       <Alert>
-        <AlertTriangle className="h-4 w-4" />
+        <TriangleAlert className="h-4 w-4" />
         <AlertTitle>{t("connections.note")}</AlertTitle>
         <AlertDescription>
           {t("connections.warning")}
@@ -327,7 +327,7 @@ export default function ConnectionsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
+              <CircleCheckBig className="h-5 w-5 text-green-500" />
               <CardTitle>{t("connections.connected")}</CardTitle>
             </div>
             <CardDescription>{t("connections.connectedDesc")}</CardDescription>
@@ -361,7 +361,7 @@ export default function ConnectionsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="default" className="gap-1">
-                        <CheckCircle className="h-3 w-3" />
+                        <CircleCheckBig className="h-3 w-3" />
                         {t("connections.connectedBadge")}
                       </Badge>
                       <Button
@@ -519,7 +519,7 @@ export default function ConnectionsPage() {
               }
               disabled={unlinking}
             >
-              {unlinking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {unlinking && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
               {unlinkRequiresReAuth
                 ? t("connections.reauthAndUnlink")
                 : t("connections.confirmUnlink")}

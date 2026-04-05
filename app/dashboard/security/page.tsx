@@ -23,12 +23,12 @@ import {
   Shield,
   Smartphone,
   History,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
+  TriangleAlert,
+  CircleCheckBig,
+  CircleX,
   Monitor,
   ExternalLink,
-  Loader2,
+  LoaderCircle,
 } from "lucide-react";
 import { AccountInfo, LoginHistoryRecord, MfaVerification } from "@/lib/logto";
 import type { FeaturesConfig } from "@/config/types";
@@ -303,9 +303,9 @@ export default function SecurityPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {accountInfo?.hasPassword ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CircleCheckBig className="h-5 w-5 text-green-500" />
               ) : (
-                <XCircle className="h-5 w-5 text-destructive" />
+                <CircleX className="h-5 w-5 text-destructive" />
               )}
               <div>
                 <p className="font-medium">
@@ -355,7 +355,7 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {mfaStatus.totpEnabled ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <CircleCheckBig className="h-5 w-5 text-green-500" />
                     ) : (
                       <Smartphone className="h-5 w-5 text-muted-foreground" />
                     )}
@@ -455,7 +455,7 @@ export default function SecurityPage() {
                             onClick={handleRemoveTotp}
                           >
                             {totpRemovalDialog.removing ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                             ) : null}
                             {t("security.mfa.remove")}
                           </Button>
@@ -478,7 +478,7 @@ export default function SecurityPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {mfaStatus.webAuthnEnabled ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <CircleCheckBig className="h-5 w-5 text-green-500" />
                     ) : (
                       <Key className="h-5 w-5 text-muted-foreground" />
                     )}
@@ -529,7 +529,7 @@ export default function SecurityPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {mfaStatus.backupCodeEnabled ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CircleCheckBig className="h-5 w-5 text-green-500" />
                   ) : (
                     <Key className="h-5 w-5 text-muted-foreground" />
                   )}
@@ -682,7 +682,7 @@ export default function SecurityPage() {
       <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-900/20">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <TriangleAlert className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
             <CardTitle className="text-yellow-800 dark:text-yellow-200">{t("security.tips.title")}</CardTitle>
           </div>
         </CardHeader>

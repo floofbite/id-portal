@@ -31,7 +31,7 @@ import {
   Smartphone,
   Link,
   Camera,
-  Loader2,
+  LoaderCircle,
   ExternalLink,
 } from "lucide-react";
 import { AccountInfo } from "@/lib/logto";
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                          onClick={() => handleUpdateProfile("avatar", getFormState("avatar").value)}
                          disabled={getFormState("avatar").saving}
                        >
-                         {getFormState("avatar").saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                         {getFormState("avatar").saving && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                          {t("common.save")}
                        </Button>
                      </DialogFooter>
@@ -386,7 +386,7 @@ export default function ProfilePage() {
                          onClick={() => handleUpdateProfile(key, formState.value)}
                          disabled={formState.saving}
                        >
-                         {formState.saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                         {formState.saving && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                          {t("common.save")}
                        </Button>
                      </DialogFooter>

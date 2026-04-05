@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ServiceCard } from "@/components/portal/service-card";
-import { Search, Sparkles, X, AlertCircle } from "lucide-react";
+import { Search, Sparkles, X, CircleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePublicConfig } from "@/hooks/use-public-config";
 import type { Service, ServiceCategory } from "@/config/types";
@@ -170,7 +170,7 @@ export default function PortalPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-4" />
+          <CircleAlert className="h-8 w-8 text-destructive mx-auto mb-4" />
           <p className="font-medium">{t("toast.loadError")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {configError.message}

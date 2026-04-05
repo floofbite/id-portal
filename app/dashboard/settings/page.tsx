@@ -28,8 +28,8 @@ import {
   Monitor,
   Globe,
   Trash2,
-  AlertTriangle,
-  Loader2,
+  TriangleAlert,
+  LoaderCircle,
   ShieldAlert,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
@@ -314,7 +314,7 @@ export default function SettingsPage() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
+                <TriangleAlert className="h-4 w-4" />
                 <AlertTitle>{t("settings.deleteWarningTitle")}</AlertTitle>
                 <AlertDescription>
                   {t("settings.deleteWarningDesc")}
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                 disabled={deleteDialog.deleting}
               >
                 {deleteDialog.deleting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {t("settings.deleteConfirmButton")}
               </Button>

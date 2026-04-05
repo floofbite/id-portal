@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Globe,
-  CheckCircle,
-  XCircle,
-  Loader2,
+  CircleCheckBig,
+  CircleX,
+  LoaderCircle,
 } from "lucide-react";
 import type { Service } from "@/config/types";
 import { useTranslations } from "@/lib/i18n/client";
@@ -39,7 +39,7 @@ export function ServiceCard({ service, health }: ServiceCardProps) {
       case "online":
         return (
           <Badge variant="default" className="gap-1 bg-green-500 hover:bg-green-600">
-            <CheckCircle className="h-3 w-3" />
+            <CircleCheckBig className="h-3 w-3" />
             {health.latency && health.latency < 1000
               ? `${health.latency}ms`
               : t("service.status.normal")}
@@ -48,14 +48,14 @@ export function ServiceCard({ service, health }: ServiceCardProps) {
       case "offline":
         return (
           <Badge variant="destructive" className="gap-1">
-            <XCircle className="h-3 w-3" />
+            <CircleX className="h-3 w-3" />
             {t("service.status.offline")}
           </Badge>
         );
       case "checking":
         return (
           <Badge variant="secondary" className="gap-1">
-            <Loader2 className="h-3 w-3 animate-spin" />
+            <LoaderCircle className="h-3 w-3 animate-spin" />
             {t("service.status.checking")}
           </Badge>
         );
