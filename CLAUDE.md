@@ -31,7 +31,7 @@ Image selection is controlled by:
 
 ## High-Level Architecture
 
-Next.js 15 App Router project with two surfaces:
+Next.js 16 App Router project with two surfaces:
 
 - `app/dashboard/*`: authenticated account center
 - `app/portal/*`: service portal UI
