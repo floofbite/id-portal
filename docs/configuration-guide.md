@@ -132,8 +132,11 @@
    - **配置身份标识 (Identifiers)**：在“账户体验”或“账户中心”设置中，给予你希望允许用户修改的身份标识（如 Email, Phone, Username）**可编辑 (Editable)** 的权限。
 4. 配置回调地址（Sign-in callback）
    - 至少包含：`{你的域名}/callback`
-5. 如果启用社交连接：在 Logto 配置对应 social connector
+5. 配置退出后重定向 URIs（Sign-out callback）
+   - `{你的域名}/`
+6. 如果启用社交连接：在 Logto 配置对应 social connector
    - 获取 connectorId，填到 `features.yaml` 的 `socialIdentities.config.connectors[].connectorId`
+
 
 ### B. 第三方身份提供商（Google / GitHub / QQ 等）
 

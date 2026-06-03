@@ -132,7 +132,9 @@ Configurable keys: `enabled`, `label`, `description`, `placeholder`, `inputType`
    - **Configure Identifiers**: in account experience/account center settings, grant editable permission for identifiers you want users to change (Email, Phone, Username, etc.).
 4. Configure sign-in callback URLs
    - Must include at least: `{your-domain}/callback`
-5. If social login is enabled: configure social connectors in Logto
+5. Configure sign-out callback URLs
+   - `{your-domain}/`
+6. If social login is enabled: configure social connectors in Logto
    - Copy connectorId into `features.yaml` path `socialIdentities.config.connectors[].connectorId`
 
 ### B. Third-party providers (Google / GitHub / QQ, etc.)
