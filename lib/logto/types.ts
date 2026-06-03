@@ -112,11 +112,19 @@ export interface BackupCodeStatus {
 
 export interface LoginHistoryRecord {
   id: string;
+  /** Logto log key, e.g. "Interaction.SignIn.Submit" */
   event: string;
+  /** Human-readable event label (localized) */
+  eventLabel: string;
   timestamp: number;
+  /** Application name resolved from applicationId, or fallback */
   applicationName: string;
+  /** Application ID from Logto */
+  applicationId?: string;
   ip?: string;
   userAgent?: string;
+  /** Result: "Success" | "Error" | unknown */
+  result?: string;
 }
 
 // ============ Session Management Types (Logto v1.38+) ============

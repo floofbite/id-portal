@@ -819,15 +819,29 @@ export default function SecurityPage() {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                            <Monitor className="h-5 w-5" />
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${record.result === "Error" ? "bg-destructive/10" : "bg-muted"}`}>
+                            <Monitor className={`h-5 w-5 ${record.result === "Error" ? "text-destructive" : ""}`} />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium truncate">{record.applicationName}</p>
-                            <p className="text-sm text-muted-foreground truncate">{t("security.loginHistory.event")}: {record.event}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-medium truncate">{record.applicationName}</p>
+                              {record.result === "Success" && (
+                                <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">
+                                  {t("security.loginHistory.success")}
+                                </Badge>
+                              )}
+                              {record.result === "Error" && (
+                                <Badge variant="destructive" className="text-xs">
+                                  {t("security.loginHistory.failed")}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {t("security.loginHistory.event")}: {record.eventLabel}
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right text-xs text-muted-foreground">
+                        <div className="text-right text-xs text-muted-foreground shrink-0">
                           <p>{formatDateTime(record.timestamp)}</p>
                           <p>{formatTimeAgo(record.timestamp)}</p>
                         </div>
@@ -835,7 +849,7 @@ export default function SecurityPage() {
                       {(record.ip || record.userAgent) && (
                         <div className="mt-3 text-xs text-muted-foreground space-y-1">
                           {record.ip && <p>IP: {record.ip}</p>}
-                          {record.userAgent && <p className="truncate">{t("security.loginHistory.device")}: {record.userAgent}</p>}
+                          {record.userAgent && <p className="truncate">{t("security.loginHistory.device")}: {parseUserAgent(record.userAgent)}</p>}
                         </div>
                       )}
                     </div>

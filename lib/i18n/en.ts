@@ -164,6 +164,8 @@ export const en = {
       event: "Event",
       device: "Device",
       ip: "IP",
+      success: "Success",
+      failed: "Failed",
     },
     sessionManagement: {
       title: "Session Management",

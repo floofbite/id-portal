@@ -169,6 +169,8 @@ export const zh = {
       ip: "IP",
       device: "设备",
       event: "事件",
+      success: "成功",
+      failed: "失败",
     },
     sessionManagement: {
       title: "会话管理",
