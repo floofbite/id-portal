@@ -17,6 +17,8 @@ import type {
   AllIdentitiesResponse,
   SocialConnector,
   LoginHistoryRecord,
+  LogtoRawSession,
+  SessionInfo,
 } from "./types";
 
 /**
@@ -395,6 +397,81 @@ export async function getUserLoginHistory(): Promise<LoginHistoryRecord[]> {
     .filter((record): record is LoginHistoryRecord => Boolean(record))
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 20);
+}
+
+// ============ Session Management (Logto v1.38+) ============
+
+/**
+ * 获取用户的活跃会话列表
+ * GET /api/users/{userId}/sessions
+ */
+export async function getUserActiveSessions(): Promise<SessionInfo[]> {
+  const { accessToken, userId } = await getManagementContext();
+
+  const res = await fetchWithAuth({
+    url: `${logtoConfig.endpoint}/api/users/${userId}/sessions`,
+    accessToken,
+    operationName: "获取活跃会话",
+  });
+
+  const data = await res.json();
+
+  // API may return { sessions: [...] } or a plain array
+  const rawSessions: LogtoRawSession[] = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.sessions)
+      ? data.sessions
+      : [];
+
+  // Determine current session's client ID from the access token context
+  const { claims } = await getLogtoContext();
+  const currentClientId = claims?.client_id as string | undefined;
+
+  return rawSessions
+    .map((session): SessionInfo => {
+      const signInContext = session.lastSubmission?.signInContext;
+      const verificationRecords = session.lastSubmission?.verificationRecords;
+      const authMethod = verificationRecords?.[0]?.type;
+
+      // Detect if this is the current session:
+      // Match by client ID + approximate login time
+      const isCurrent =
+        currentClientId != null &&
+        session.clientId === currentClientId &&
+        claims?.auth_time != null &&
+        Math.abs(session.payload.loginTs - (claims.auth_time as number)) < 5;
+
+      return {
+        id: session.payload.uid,
+        isCurrent,
+        loginAt: session.payload.loginTs > 10_000_000_000
+          ? session.payload.loginTs
+          : session.payload.loginTs * 1000,
+        expiresAt: session.expiresAt > 10_000_000_000
+          ? session.expiresAt
+          : session.expiresAt * 1000,
+        clientId: session.clientId,
+        ip: signInContext?.ip,
+        userAgent: signInContext?.userAgent,
+        authMethod,
+      };
+    })
+    .sort((a, b) => b.loginAt - a.loginAt);
+}
+
+/**
+ * 撤销用户会话
+ * DELETE /api/users/{userId}/sessions/{sessionId}
+ */
+export async function revokeUserSession(sessionId: string): Promise<void> {
+  const { accessToken, userId } = await getManagementContext();
+
+  await fetchVoidWithAuth({
+    url: `${logtoConfig.endpoint}/api/users/${userId}/sessions/${encodeURIComponent(sessionId)}`,
+    accessToken,
+    method: "DELETE",
+    operationName: "撤销会话",
+  });
 }
 
 // ============ Account Deletion ============

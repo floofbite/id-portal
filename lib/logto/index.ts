@@ -60,6 +60,9 @@ export {
   removeSocialIdentityWithVerification,
   // Login History
   getUserLoginHistory,
+  // Session Management
+  getUserActiveSessions,
+  revokeUserSession,
   // Account Deletion
   deleteUserAccount,
 } from "./management-api";
@@ -73,6 +76,7 @@ export type {
   MfaVerification,
   BackupCodeStatus,
   LoginHistoryRecord,
+  SessionInfo,
   SocialConnector,
   VerificationResponse,
   VerificationCodeResponse,

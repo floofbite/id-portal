@@ -29,16 +29,18 @@ import {
   Monitor,
   ExternalLink,
   LoaderCircle,
+  MonitorSmartphone,
+  Trash2,
 } from "lucide-react";
-import { AccountInfo, LoginHistoryRecord, MfaVerification } from "@/lib/logto";
+import { AccountInfo, LoginHistoryRecord, MfaVerification, SessionInfo } from "@/lib/logto";
 import type { FeaturesConfig } from "@/config/types";
 import { isFeatureEnabled as isFeatureEnabledFromConfig } from "@/lib/config/feature-helpers";
 import { usePublicConfig } from "@/hooks/use-public-config";
 import { accountCenterUrls, getAccountCenterSuccessType, clearAccountCenterSuccessParam } from "@/lib/logto-account-ui";
 
-// 只显示最近 7 天的登录记录，最多 10 条
+// 只显示最近 7 天的登录记录，最多 3 条
 const MAX_LOGIN_HISTORY_DAYS = 7;
-const MAX_LOGIN_HISTORY_ITEMS = 10;
+const MAX_LOGIN_HISTORY_ITEMS = 3;
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -48,11 +50,17 @@ export default function SecurityPage() {
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [loginHistory, setLoginHistory] = useState<LoginHistoryRecord[]>([]);
   const [mfaVerifications, setMfaVerifications] = useState<MfaVerification[]>([]);
+  const [activeSessions, setActiveSessions] = useState<SessionInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [totpRemovalDialog, setTotpRemovalDialog] = useState({
     open: false,
     password: "",
     removing: false,
+  });
+  const [revokeSessionDialog, setRevokeSessionDialog] = useState({
+    open: false,
+    sessionId: "",
+    revoking: false,
   });
 
   const runtimeFeatures = runtimeConfig?.features;
@@ -85,9 +93,12 @@ export default function SecurityPage() {
         isFeatureEnabled("mfa", "webAuthn") ||
         isFeatureEnabled("passkey");
 
-      const [accountRes, historyRes, mfaRes] = await Promise.all([
+      const shouldFetchSessions = isFeatureEnabled("sessions");
+
+      const [accountRes, historyRes, activeSessionsRes, mfaRes] = await Promise.all([
         fetch("/api/account-info"),
-        isFeatureEnabled("sessions") ? fetch("/api/account/sessions") : Promise.resolve(null),
+        shouldFetchSessions ? fetch("/api/account/sessions") : Promise.resolve(null),
+        shouldFetchSessions ? fetch("/api/account/sessions?type=active") : Promise.resolve(null),
         shouldFetchMfa ? fetch("/api/account/mfa") : Promise.resolve(null),
       ]);
 
@@ -103,12 +114,17 @@ export default function SecurityPage() {
 
       if (historyRes && historyRes.ok) {
         const historyData = await historyRes.json();
-        // 过滤最近 7 天的记录，最多 10 条
+        // 过滤最近 7 天的记录，最多 3 条
         const cutoffTime = Date.now() - MAX_LOGIN_HISTORY_DAYS * 24 * 60 * 60 * 1000;
         const filtered = historyData
           .filter((record: LoginHistoryRecord) => record.timestamp >= cutoffTime)
           .slice(0, MAX_LOGIN_HISTORY_ITEMS);
         setLoginHistory(filtered);
+      }
+
+      if (activeSessionsRes && activeSessionsRes.ok) {
+        const sessionsData = await activeSessionsRes.json();
+        setActiveSessions(Array.isArray(sessionsData) ? sessionsData : []);
       }
 
       if (mfaRes && mfaRes.ok) {
@@ -167,9 +183,31 @@ export default function SecurityPage() {
       hour12: false,
     });
 
+  // 解析 User-Agent 为可读设备名称
+  const parseUserAgent = (ua: string | undefined): string => {
+    if (!ua) return t("security.sessionManagement.noActiveSessions");
+
+    // 检测浏览器
+    let browser = "";
+    if (ua.includes("Edg/")) browser = "Edge";
+    else if (ua.includes("Chrome/") && !ua.includes("Edg/")) browser = "Chrome";
+    else if (ua.includes("Firefox/")) browser = "Firefox";
+    else if (ua.includes("Safari/") && !ua.includes("Chrome/")) browser = "Safari";
+    else browser = "Browser";
+
+    // 检测操作系统
+    let os = "";
+    if (ua.includes("Windows")) os = "Windows";
+    else if (ua.includes("Mac OS X")) os = "macOS";
+    else if (ua.includes("Linux")) os = "Linux";
+    else if (ua.includes("Android")) os = "Android";
+    else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+    else os = "Unknown OS";
+
+    return `${browser} · ${os}`;
+  };
+
   // 获取 MFA 状态
-  // 注意：Logto API 返回的 type 字段可能是 "Totp", "WebAuthn", "BackupCode"
-  // 但实际返回的值可能大小写不同，这里使用大小写不敏感的匹配
   const getMfaStatus = () => {
     const totpEnabled = mfaVerifications.some(v => 
       v.type?.toLowerCase() === "totp"
@@ -194,6 +232,38 @@ export default function SecurityPage() {
   const totpVerification = mfaVerifications.find((verification) =>
     verification.type?.toLowerCase() === "totp"
   );
+
+  // 注销会话
+  const handleRevokeSession = async () => {
+    setRevokeSessionDialog((prev) => ({ ...prev, revoking: true }));
+
+    try {
+      const res = await fetch(
+        `/api/account/sessions/${encodeURIComponent(revokeSessionDialog.sessionId)}`,
+        { method: "DELETE" }
+      );
+
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || t("security.sessionManagement.revokeFailDesc"));
+      }
+
+      toast({
+        title: t("security.sessionManagement.revokeSuccessTitle"),
+        description: t("security.sessionManagement.revokeSuccessDesc"),
+      });
+
+      setRevokeSessionDialog({ open: false, sessionId: "", revoking: false });
+      await fetchData();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: t("security.sessionManagement.revokeFailTitle"),
+        description: error instanceof Error ? error.message : t("security.sessionManagement.revokeFailDesc"),
+      });
+      setRevokeSessionDialog((prev) => ({ ...prev, revoking: false }));
+    }
+  };
 
   const handleRemoveTotp = async () => {
     if (!totpVerification?.id) {
@@ -288,7 +358,7 @@ export default function SecurityPage() {
         </p>
       </div>
 
-      {/* Password Section - 跳转到 Logto Account Center */}
+      {/* Password Section */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -334,7 +404,7 @@ export default function SecurityPage() {
         </CardContent>
       </Card>
 
-      {/* MFA Section - 跳转到 Logto Account Center UI */}
+      {/* MFA Section */}
       {isFeatureEnabled("mfa", "totp") || isFeatureEnabled("passkey") ? (
         <Card>
           <CardHeader>
@@ -601,7 +671,128 @@ export default function SecurityPage() {
         </Card>
       )}
 
-      {/* Login History - 限制显示最近 7 天，最多 10 条 */}
+      {/* Session Management - 在登录记录前面 */}
+      {isFeatureEnabled("sessions") && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <MonitorSmartphone className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>{t("security.sessionManagement.title")}</CardTitle>
+            </div>
+            <CardDescription>
+              {activeSessions.length > 0
+                ? t("security.sessionManagement.activeSessionsCount", { count: String(activeSessions.length) })
+                : t("security.sessionManagement.description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {activeSessions.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  {t("security.sessionManagement.noActiveSessions")}
+                </p>
+              ) : (
+                activeSessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className={`rounded-lg border p-4 ${session.isCurrent ? "border-primary/30 bg-primary/5" : ""}`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${session.isCurrent ? "bg-primary/10" : "bg-muted"}`}>
+                          <MonitorSmartphone className={`h-5 w-5 ${session.isCurrent ? "text-primary" : ""}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">
+                              {parseUserAgent(session.userAgent)}
+                            </p>
+                            {session.isCurrent && (
+                              <Badge variant="default" className="text-xs">
+                                {t("security.sessionManagement.currentDevice")}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {t("security.sessionManagement.signInTime")}: {formatTimeAgo(session.loginAt)}
+                            {session.ip && (
+                              <span className="ml-2">· IP: {session.ip}</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        {!session.isCurrent && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() =>
+                              setRevokeSessionDialog({
+                                open: true,
+                                sessionId: session.id,
+                                revoking: false,
+                              })
+                            }
+                          >
+                            <Trash2 className="mr-1 h-4 w-4" />
+                            {t("security.sessionManagement.revoke")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Revoke Session Confirmation Dialog */}
+      <Dialog
+        open={revokeSessionDialog.open}
+        onOpenChange={(open) => {
+          if (revokeSessionDialog.revoking) return;
+          setRevokeSessionDialog((prev) => ({
+            ...prev,
+            open,
+            sessionId: open ? prev.sessionId : "",
+          }));
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("security.sessionManagement.revokeConfirmTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("security.sessionManagement.revokeConfirmDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={revokeSessionDialog.revoking}
+              onClick={() =>
+                setRevokeSessionDialog({ open: false, sessionId: "", revoking: false })
+              }
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={revokeSessionDialog.revoking}
+              onClick={handleRevokeSession}
+            >
+              {revokeSessionDialog.revoking ? (
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {t("security.sessionManagement.revoke")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Login History - 限制显示最近 7 天，最多 3 条 */}
       {isFeatureEnabled("sessions") ? (
         <Card>
           <CardHeader>
