@@ -112,11 +112,82 @@ export interface BackupCodeStatus {
 
 export interface LoginHistoryRecord {
   id: string;
+  /** Logto log key, e.g. "Interaction.SignIn.Submit" */
   event: string;
+  /** Human-readable event label (localized) */
+  eventLabel: string;
   timestamp: number;
+  /** Application name resolved from applicationId, or fallback */
   applicationName: string;
+  /** Application ID from Logto */
+  applicationId?: string;
   ip?: string;
   userAgent?: string;
+  /** Result: "Success" | "Error" | unknown */
+  result?: string;
+}
+
+// ============ Session Management Types (Logto v1.38+) ============
+
+/** Raw session from Logto Management API /api/users/{userId}/sessions */
+export interface LogtoRawSession {
+  payload: {
+    exp: number;
+    iat: number;
+    jti: string;
+    uid: string;
+    kind: string;
+    loginTs: number;
+    accountId: string;
+    authorizations?: Record<
+      string,
+      {
+        sid: string;
+        grantId: string;
+        persistsLogout: boolean;
+      }
+    >;
+  };
+  lastSubmission: {
+    interactionEvent: string;
+    userId: string;
+    verificationRecords?: Array<{
+      id: string;
+      type: string;
+      identifier: {
+        type: string;
+        value: string;
+      };
+      verified: boolean;
+    }>;
+    signInContext?: {
+      ip?: string;
+      userAgent?: string;
+      [key: string]: unknown;
+    };
+  } | null;
+  clientId: string | null;
+  accountId: string | null;
+  expiresAt: number;
+}
+
+/** Normalized session info for frontend display */
+export interface SessionInfo {
+  id: string;
+  /** Whether this is the current session */
+  isCurrent: boolean;
+  /** Login timestamp (ms) */
+  loginAt: number;
+  /** Session expiration (ms) */
+  expiresAt: number;
+  /** Client app ID that initiated the session */
+  clientId: string | null;
+  /** IP address at sign-in */
+  ip?: string;
+  /** User-Agent at sign-in */
+  userAgent?: string;
+  /** Authentication method (e.g. "password", "email") */
+  authMethod?: string;
 }
 
 // ============ Social Connector Types ============

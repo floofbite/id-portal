@@ -17,6 +17,8 @@ import type {
   AllIdentitiesResponse,
   SocialConnector,
   LoginHistoryRecord,
+  LogtoRawSession,
+  SessionInfo,
 } from "./types";
 
 /**
@@ -259,6 +261,90 @@ export async function removeSocialIdentityWithVerification(
 
 // ============ Login History ============
 
+/**
+ * Logto log key → 人类可读标签的映射
+ * Logto logs API 返回的 key 字段值（如 Interaction.SignIn.Submit）
+ */
+const LOG_KEY_LABELS: Record<string, string> = {
+  // Sign-In
+  "Interaction.SignIn.Submit": "登录",
+  "Interaction.SignIn.Create": "发起登录",
+  "Interaction.SignIn.Identifier.Password.Submit": "密码登录",
+  "Interaction.SignIn.Identifier.VerificationCode.Submit": "验证码登录",
+  "Interaction.SignIn.Identifier.Social.Submit": "社交账号登录",
+  "Interaction.SignIn.Identifier.SingleSignOn.Submit": "SSO 登录",
+  "Interaction.SignIn.Verification.Totp.Submit": "TOTP 验证",
+  "Interaction.SignIn.Verification.WebAuthn.Submit": "WebAuthn 验证",
+  "Interaction.SignIn.Verification.BackupCode.Submit": "备用码验证",
+  "Interaction.SignIn.Verification.SignInPasskey.Submit": "通行密钥登录",
+  // Register
+  "Interaction.Register.Submit": "注册",
+  "Interaction.Register.Create": "发起注册",
+  // Token Exchange
+  "ExchangeTokenBy.AuthorizationCode": "授权码换Token",
+  "ExchangeTokenBy.RefreshToken": "刷新Token",
+  "ExchangeTokenBy.ClientCredentials": "客户端凭据",
+  "ExchangeTokenBy.TokenExchange": "Token交换",
+  // Interaction
+  "Interaction.Create": "交互开始",
+  "Interaction.End": "交互结束",
+  // Forgot Password
+  "Interaction.ForgotPassword.Submit": "重置密码",
+};
+
+/**
+ * 从 Logto log key 提取中文标签
+ */
+function getLogKeyLabel(key: string): string {
+  if (LOG_KEY_LABELS[key]) return LOG_KEY_LABELS[key];
+
+  // 前缀匹配：Interaction.SignIn.* → 登录相关
+  if (key.startsWith("Interaction.SignIn")) return "登录";
+  if (key.startsWith("Interaction.Register")) return "注册";
+  if (key.startsWith("Interaction.ForgotPassword")) return "重置密码";
+  if (key.startsWith("ExchangeTokenBy")) return "Token 交互";
+  if (key.startsWith("Interaction.")) return "用户交互";
+
+  return key;
+}
+
+/**
+ * 应用名缓存（applicationId → name），进程级缓存避免重复请求
+ */
+let applicationNameCache: Map<string, string> | null = null;
+
+/**
+ * 获取所有应用并构建 id→name 映射
+ */
+async function getApplicationNameMap(): Promise<Map<string, string>> {
+  if (applicationNameCache) return applicationNameCache;
+
+  try {
+    const { accessToken } = await getManagementContext();
+    const res = await fetchWithAuth({
+      url: `${logtoConfig.endpoint}/api/applications`,
+      accessToken,
+      operationName: "获取应用列表（用于日志解析）",
+    });
+
+    const apps = await res.json();
+    const rawApps: Array<Record<string, unknown>> = Array.isArray(apps) ? apps : [];
+
+    applicationNameCache = new Map<string, string>();
+    for (const app of rawApps) {
+      const id = typeof app.id === "string" ? app.id : "";
+      const name = typeof app.name === "string" ? app.name : "";
+      if (id && name) {
+        applicationNameCache.set(id, name);
+      }
+    }
+    return applicationNameCache;
+  } catch (error) {
+    logger.error("获取应用列表失败:", error);
+    return new Map();
+  }
+}
+
 function normalizeLogTimestamp(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value > 10_000_000_000 ? value : value * 1000;
@@ -310,19 +396,24 @@ function isServerSideRequest(userAgent: string | undefined): boolean {
 
 /**
  * 获取用户登录记录
+ * Logto logs API 返回字段：key (事件类型), payload.applicationId, payload.ip, payload.userAgent 等
  */
 export async function getUserLoginHistory(): Promise<LoginHistoryRecord[]> {
   const { accessToken, userId } = await getManagementContext();
 
+  // 并行获取日志和应用名映射
   const url = new URL(`${logtoConfig.endpoint}/api/logs`);
   url.searchParams.set("userId", userId);
   url.searchParams.set("pageSize", "20");
 
-  const res = await fetchWithAuth({
-    url: url.toString(),
-    accessToken,
-    operationName: "获取登录记录",
-  });
+  const [res, appNameMap] = await Promise.all([
+    fetchWithAuth({
+      url: url.toString(),
+      accessToken,
+      operationName: "获取登录记录",
+    }),
+    getApplicationNameMap(),
+  ]);
 
   const payload = await res.json();
   const rawLogs: Array<Record<string, unknown>> = Array.isArray(payload)
@@ -346,6 +437,7 @@ export async function getUserLoginHistory(): Promise<LoginHistoryRecord[]> {
 
       if (!timestamp) return null;
 
+      // IP: payload.ip 优先
       const ip =
         typeof log.ip === "string"
           ? log.ip
@@ -353,7 +445,7 @@ export async function getUserLoginHistory(): Promise<LoginHistoryRecord[]> {
             ? payloadObj.ip
             : undefined;
 
-      // 获取 User-Agent
+      // User-Agent: payload.userAgent
       const rawUserAgent =
         typeof log.userAgent === "string"
           ? log.userAgent
@@ -361,40 +453,128 @@ export async function getUserLoginHistory(): Promise<LoginHistoryRecord[]> {
             ? payloadObj.userAgent
             : undefined;
       
-      // 完全屏蔽服务端发起的请求记录
+      // 屏蔽服务端发起的请求记录
       if (isServerSideRequest(rawUserAgent)) {
         return null;
       }
 
-      const applicationName =
-        (typeof log.applicationName === "string"
-          ? log.applicationName
-          : typeof payloadObj?.applicationName === "string"
-            ? payloadObj.applicationName
-            : undefined) ?? "账户中心";
+      // 事件类型：Logto 用 `key` 字段，不是 `type`
+      const logKey =
+        typeof log.key === "string"
+          ? log.key
+          : typeof payloadObj?.key === "string"
+            ? payloadObj.key
+            : undefined;
 
-      const event =
-        (typeof log.type === "string"
-          ? log.type
-          : typeof log.event === "string"
-            ? log.event
-            : undefined) ?? "登录";
+      // 应用名：从 payload.applicationId 查询，Logto 不直接返回 applicationName
+      const applicationId =
+        typeof payloadObj?.applicationId === "string"
+          ? payloadObj.applicationId
+          : undefined;
+
+      const applicationName = applicationId
+        ? appNameMap.get(applicationId) ?? "未知应用"
+        : "账户中心";
+
+      // 事件结果
+      const result =
+        typeof payloadObj?.result === "string"
+          ? payloadObj.result
+          : undefined;
 
       const id =
-        typeof log.id === "string" ? log.id : `${timestamp}-${applicationName}`;
+        typeof log.id === "string" ? log.id : `${timestamp}-${logKey ?? "unknown"}`;
 
       return {
         id,
-        event,
+        event: logKey ?? "未知事件",
+        eventLabel: getLogKeyLabel(logKey ?? ""),
         timestamp,
         applicationName,
+        applicationId,
         ip,
         userAgent: rawUserAgent,
+        result,
       };
     })
     .filter((record): record is LoginHistoryRecord => Boolean(record))
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 20);
+}
+
+// ============ Session Management (Logto v1.38+) ============
+
+/**
+ * 获取用户的活跃会话列表
+ * GET /api/users/{userId}/sessions
+ */
+export async function getUserActiveSessions(): Promise<SessionInfo[]> {
+  const { accessToken, userId } = await getManagementContext();
+
+  const res = await fetchWithAuth({
+    url: `${logtoConfig.endpoint}/api/users/${userId}/sessions`,
+    accessToken,
+    operationName: "获取活跃会话",
+  });
+
+  const data = await res.json();
+
+  // API may return { sessions: [...] } or a plain array
+  const rawSessions: LogtoRawSession[] = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.sessions)
+      ? data.sessions
+      : [];
+
+  // Determine current session's client ID from the access token context
+  const { claims } = await getLogtoContext();
+  const currentClientId = claims?.client_id as string | undefined;
+
+  return rawSessions
+    .map((session): SessionInfo => {
+      const signInContext = session.lastSubmission?.signInContext;
+      const verificationRecords = session.lastSubmission?.verificationRecords;
+      const authMethod = verificationRecords?.[0]?.type;
+
+      // Detect if this is the current session:
+      // Match by client ID + approximate login time
+      const isCurrent =
+        currentClientId != null &&
+        session.clientId === currentClientId &&
+        claims?.auth_time != null &&
+        Math.abs(session.payload.loginTs - (claims.auth_time as number)) < 5;
+
+      return {
+        id: session.payload.uid,
+        isCurrent,
+        loginAt: session.payload.loginTs > 10_000_000_000
+          ? session.payload.loginTs
+          : session.payload.loginTs * 1000,
+        expiresAt: session.expiresAt > 10_000_000_000
+          ? session.expiresAt
+          : session.expiresAt * 1000,
+        clientId: session.clientId,
+        ip: signInContext?.ip,
+        userAgent: signInContext?.userAgent,
+        authMethod,
+      };
+    })
+    .sort((a, b) => b.loginAt - a.loginAt);
+}
+
+/**
+ * 撤销用户会话
+ * DELETE /api/users/{userId}/sessions/{sessionId}
+ */
+export async function revokeUserSession(sessionId: string): Promise<void> {
+  const { accessToken, userId } = await getManagementContext();
+
+  await fetchVoidWithAuth({
+    url: `${logtoConfig.endpoint}/api/users/${userId}/sessions/${encodeURIComponent(sessionId)}`,
+    accessToken,
+    method: "DELETE",
+    operationName: "撤销会话",
+  });
 }
 
 // ============ Account Deletion ============
