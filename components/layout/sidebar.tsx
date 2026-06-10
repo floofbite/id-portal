@@ -87,7 +87,7 @@ export function Sidebar({ user, portalEnabled = true }: SidebarProps) {
 
       {visibleAuxiliaryNavItems.length > 0 ? (
         <>
-          <Separator className="mx-3 w-auto" />
+          <Separator />
 
           {/* Portal Link */}
           <div className="p-3">
