@@ -32,10 +32,10 @@ features:
           displayName: Google
           icon: google
           description: Google login
-        - target: github
-          connectorId: logto_github_connector_id
+        - target: ely
+          connectorId: yco0k375k3vylh2vux0yd
           enabled: true
-          displayName: GitHub
+          displayName: ely.by
           icon: github
           description: 绑定 GitHub 账号
         - target: qq
