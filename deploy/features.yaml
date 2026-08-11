@@ -1,6 +1,6 @@
 features:
   emailChange:
-    enabled: true
+    enabled: false
 
   phoneChange:
     enabled: false
@@ -27,11 +27,11 @@ features:
       # target 建议与 Logto connector 的 target 保持一致（如 google/github/qq/wechat/discord/...）。
       connectors:
         - target: google
-          connectorId: logto_google_connector_id
-          enabled: false
+          connectorId: fs1x8tkij0me0hnul4b6r
+          enabled: true
           displayName: Google
           icon: google
-          description: 绑定 Google 账号
+          description: Google login
         - target: github
           connectorId: logto_github_connector_id
           enabled: true
