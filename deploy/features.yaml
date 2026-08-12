@@ -32,18 +32,18 @@ features:
           displayName: Google
           icon: google
           description: Google login
+        - target: discord
+          connectorId: 5igch1uior30c6f2q2fho
+          enabled: true
+          displayName: Discord
+          icon: discord
+          description: Discord
         - target: ely
           connectorId: yco0k375k3vylh2vux0yd
           enabled: true
           displayName: ely.by
-          icon: github
-          description: 绑定 GitHub 账号
-        - target: qq
-          connectorId: logto_qq_connector_id
-          enabled: true
-          displayName: QQ
-          icon: qq
-          description: 绑定 QQ 账号
+          icon: web
+          description: ely.by Minecraft skins
 
         # 下面是更多平台示例（按需启用）
         # - target: apple
