@@ -76,37 +76,37 @@ features:
 profileFields:
   avatar:
     enabled: true
-    label: 头像
-    description: 您的个人头像
+    label: Avatar
+    description: Profile picture URL
     placeholder: https://example.com/avatar.jpg
     inputType: url
 
   name:
     enabled: true
-    label: 显示名称
-    description: 您的公开显示名称
-    placeholder: 输入您的姓名
+    label: Display name
+    description: Name
+    placeholder: User
     inputType: text
     required: true
 
   birthdate:
     enabled: false
-    label: 出生日期
-    description: 您的生日信息
+    label: Birthdate
+    description: Birthday date
     inputType: date
 
   zoneinfo:
     enabled: false
-    label: 时区
-    description: 您所在的时区
+    label: Region
+    description: Your region
     placeholder: Asia/Shanghai
     inputType: text
 
   locale:
-    enabled: false
-    label: 语言
-    description: 界面语言偏好
-    placeholder: zh-CN
+    enabled: true
+    label: Locale
+    description: Language and region
+    placeholder: en-US
     inputType: text
 
   website:
