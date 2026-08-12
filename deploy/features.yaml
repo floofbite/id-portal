@@ -39,7 +39,7 @@ features:
           icon: discord
           description: Discord
         - target: ely
-          connectorId: w6gd5w3gydxps19r644yj
+          connectorId: a6j7hq2lwp9j87qhdw22h
           enabled: true
           displayName: ely.by
           icon: web
