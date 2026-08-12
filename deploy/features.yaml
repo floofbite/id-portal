@@ -103,7 +103,7 @@ profileFields:
     inputType: text
 
   locale:
-    enabled: true
+    enabled: false
     label: Locale
     description: Language and region
     placeholder: en-US
